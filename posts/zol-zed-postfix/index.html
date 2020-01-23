@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+      <title>ZFS on Linux, ZED, and Postfix :: rbtr.dev — evan&#39;s blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
+I have a few TB of data that&#39;s been living in a Btrfs array on an underpowered FX &amp;ldquo;server&amp;rdquo; that I want to move to a more robust ZFS array in the new Epyc server. This describes setting up ZFS on Linux, ZED, and Postfix&#43;Mailx for regular filesystem status emails.
+Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS is an enterprise filesystem created by Sun for OpenSolaris more than 15 years ago."/>
+<meta name="keywords" content="blog,rbtr,aws,cloud,kubernetes,epyc,amd,vfio,iommu,fedora,linux,boot,grub"/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://blog.rbtr.dev/posts/zol-zed-postfix/" />
+
+
+
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/assets/style.css">
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://blog.rbtr.dev/img/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://blog.rbtr.dev/img/favicon.png">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="ZFS on Linux, ZED, and Postfix"/>
+<meta name="twitter:description" content="Deploying and monitoring a ZFS pool with email status reports"/>
+
+
+
+<meta property="og:title" content="ZFS on Linux, ZED, and Postfix" />
+<meta property="og:description" content="Deploying and monitoring a ZFS pool with email status reports" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.rbtr.dev/posts/zol-zed-postfix/" />
+<meta property="article:published_time" content="2020-01-08T21:05:00-05:00" />
+<meta property="article:modified_time" content="2020-01-08T21:05:00-05:00" /><meta property="og:site_name" content="rbtr.dev" />
+
+
+
+
+
+
+  </head>
+  <body class="themed dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/archive">Archive</a></li>
+        
+      
+        
+          <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+        
+      
+        
+          <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+        
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+      
+    
+      
+        <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none"/>
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  <div class="post">
+    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/zol-zed-postfix/">ZFS on Linux, ZED, and Postfix</a></h2>
+    <div class="post-meta">
+      
+        <span class="post-date">
+            8 Jan 2020
+        </span>
+      
+      
+      
+        <span class="post-read-time">— 7 min read</span>
+      
+    </div>
+
+    
+      <span class="post-tags">
+        
+          #<a href="https://blog.rbtr.dev/tags/zfs/">zfs</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/zfs-on-linux/">zfs-on-linux</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/data/">data</a>&nbsp;
+        
+      </span>
+    
+
+    
+
+    <div class="post-content">
+      <hr>
+<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &lsquo;20s.</p>
+<p>I have a few TB of data that's been living in a Btrfs array on an underpowered FX &ldquo;server&rdquo; that I want to move to a more robust ZFS array in the new <a href="#TODO-ref-epyc">Epyc server</a>. This describes setting up ZFS on Linux, ZED, and Postfix+Mailx for regular filesystem status emails.</p>
+<h4 id="sections">Sections:</h4>
+<ul>
+<li><a href="#zfs">ZFS background</a></li>
+<li><a href="#zol">ZFS-on-Linux</a></li>
+<li><a href="#scrubs">Daily scrubs and email reports</a></li>
+</ul>
+<hr>
+<h2 id="zfs">ZFS</h2>
+<p>ZFS is an enterprise filesystem created by Sun for OpenSolaris more than 15 years ago. It has since been ported to Linux under the stewardship of the OpenZFS project - and the port has become popular enough that the ZFS-on-Linux codebase (zfsonlinux/zfs) is becoming the primary codebase for OpenZFS (according to the <a href="https://drive.google.com/file/d/197jS8_MWtfdW2LyvIFnH58uUasHuNszz/view">2019 ZFS Summit slides</a>).</p>
+<h4 id="warning-regarding-desktop-drives">Warning regarding desktop drives</h4>
+<p>ZFS wants to be run on enterprise or NAS drives. Consumer desktop drives which spin down during idle will drop out of the zpool and cause RAIDZ degradation or data loss.</p>
+<h3 id="benefits-of-zfs">Benefits of ZFS</h3>
+<p>Why am I moving to ZFS?<br>
+ZFS has some features that make it very appealing like storage pools, snapshots, native encryption and compression, software raid (raidz), native caching, and more.<br>
+My primary reasons for choosing it (and for moving away from Btrfs) is its integrity guarantees, transparent native compression, and cache support.</p>
+<h4 id="raidz">RAIDZ</h4>
+<p><a href="https://en.wikipedia.org/wiki/Standard_RAID_levels">RAID (Redundant Array of Inexpensive Disks)</a> is a method of pooling several disks togethor into a singe storage unit, while trading some of their capacity for redundancy and fault tolerance. ZFS has a built-in filesystem RAID <a href="https://pthree.org/2012/12/05/zfs-administration-part-ii-raidz/">known as RAIDZ</a> with several non-standard RAID levels. In addition to supporting standard RAID0, RAID1, and RAID10 setups with combinations of striped and mirrored Vdevs, ZFS RAIDZ, RAIDZ2, and RAIDZ3 are the better ZFS flavors of RAID5/6.</p>
+<table>
+<thead>
+<tr>
+<th align="left">ZFS RAIDZ</th>
+<th>RAID equivalent</th>
+<th>Parity stripes</th>
+<th>Tolerable disk failures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">RAIDZ(1)</td>
+<td>RAID5</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td align="left">RAIDZ2</td>
+<td>RAID6</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td align="left">RAIDZ3</td>
+<td>-</td>
+<td>3</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>I recommend playing with the RAIDZ calculator <a href="https://wintelguy.com/zfs-calc.pl/?raidtype=RZ3&amp;ndg=5&amp;ng=2&amp;zmd_chkbx=ZMD">here</a> to get an idea of what the different RAIDZ levels do to the available storage in the pool and in exchange for disk failure tolerance.</p>
+<p>In addition to tolerating whole disk <strong>failures</strong> up to the specified RAIDZ level, ZFS is also capable of silently and transparently detecting <em>and repairing</em> bit-rot and filesystem corruption that may occur during the lifetime of the array. This means that our ZFS pool will never suddenly present file corruption: ZFS will detect that the file is corrupted, correct the corruption using the redundant parity data, and serve us the corrected data while writing it back to the corrupted location.</p>
+<p>This <strong>self healing</strong> capability of ZFS is only possible in RAIDZ. To take full advantage of it, we'll also want to run <code>zfs scrub</code> on a regular basis - daily or weekly if possible - to let ZFS checksum the entire disk and fix parity errors. And to make it almost completely bulletproof, we'll also want <a href="#TODO-ref-epyc">ECC RAM</a> that will prevent memory corruption that could affect our filesystem integrity.</p>
+<p>Let me stop to answer the question you should be asking:</p>
+<blockquote>
+<p>Do I <em>need</em> ECC (or RAIDZ, or even ZFS)?</p>
+</blockquote>
+<blockquote>
+<p>No, not really.</p>
+</blockquote>
+<p>The statistical likelihood of a bitflip in memory corrupting a file being written is tiny.</p>
+<p>And the odds of a hard drive failing catastrophically decrease with every new drive released as manufacturers like Seagate and WD get better and better at building them. The drives that I have installed are warrantied for 5 years! But as the capacity of the drives increases (I've installed 10TB units), the impact that that single drive failure would have also increases. I want protect my data from at least 1 drive failure and preferably more.</p>
+<p>But I don't even really need ZFS for that. Btrfs has decent software RAID1 and 10 (but <a href="https://btrfs.wiki.kernel.org/index.php/RAID56">don't use 5/6!</a>), and Linux's MD softraid could do it too. Or a hardware RAID card, or etc, etc&hellip;</p>
+<p>But, all together, ECC and ZFS make it very, very unlikely that I will lose data on this system. (Lose <em>some</em> data. It's still vulnerable to a total system failure event - see <a href="https://www.backblaze.com/blog/the-3-2-1-backup-strategy/">3-2-1 strategy</a>)</p>
+<h4 id="compression">Compression</h4>
+<p>ZFS supports <a href="https://pthree.org/2012/12/18/zfs-administration-part-xi-compression-and-deduplication/">native compression</a>, meaning that the data will be compressed on disk but appear uncompressed when accessed - ZFS handles the compression without you the user needing to <code>unzip</code> or <code>tar -xvf</code> anything, and it applies to the entire filesystem with practically no performance penalty.</p>
+<p>ZFS also supports <a href="https://blogs.oracle.com/bonwick/zfs-deduplication-v2">deduplication</a>, where blocks or byte patterns that are already present on the disk can be reused instead of written again across the entire filesystem, but this has performance and resource usage implications:</p>
+<ul>
+<li>It eats RAM like a monster - the deduplication table needs about 5GB per 1TB of data stored.</li>
+<li>But because the dedupe table can't be more than 1/4 of the ARC (which is also in-memory), we need 4 times that much memory to be able to hold the entire ARC and dedupe table in RAM. Make that 20GB/TB of storage.</li>
+<li>And there's write delays - data coming in has to be deduped before it's written to disk.</li>
+</ul>
+<p>Deduping can save as much as 50% capacity - writing 10TB of data to 5TB of disk - but I'm going to leave it turned off.</p>
+<h2 id="zol">Installing ZFS on Linux</h2>
+<p>Installing ZoL on Fedora is the easiest part of getting ZFS up:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo dnf install http://download.zfsonlinux.org/fedora/zfs-release<span style="color:#66d9ef">$(</span>rpm -E %dist<span style="color:#66d9ef">)</span>.noarch.rpm
+$ sudo dnf install zfs kernel-devel
+</code></pre></div><p>It may be necessary to reboot if the kernel-devel version does not match the running kernel. <a href="https://github.com/zfsonlinux/zfs/wiki/Fedora">This page</a> on the Fedora wiki should be referenced for any issues.</p>
+<p>With ZFS installed, we can create our zpool. I'm going to create a 6 disk RAIDZ2 pool:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo zpool create tank raidz2 sda sdb sdc sde sdd sdf
+</code></pre></div><p>And I'll create a dataset and check the mounts (note that <code>/tank</code> is already mounted and ready to use!):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo zfs create tank/data
+$ sudo zfs list
+tank        0.0T  X.XT     0K  /tank
+tank/data  0.0T  X.XT     0T  /tank/data
+</code></pre></div><p><a href="https://pthree.org/2012/12/04/zfs-administration-part-i-vdevs/">This ZFS documentation</a> from Aaron Toponce is fantastic for building a quick understanding of vdevs, RAIDZ, zpools, and zvols.</p>
+<h2 id="scrubs">Automating daily scrubs</h2>
+<p>To take full advantage of ZFS's self-healing capabilities, we should run regular scrubs. We can automate this with <code>systemd</code>.</p>
+<p>I created a systemd unit called <code>zfs-scrub@.service</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo vi /etc/systemd/system/zfs-scrub@.service
+<span style="color:#f92672">[</span>Unit<span style="color:#f92672">]</span>                                                                                                                             
+Description<span style="color:#f92672">=</span>zpool scrub on %i                                                                                                      
+                                                                                                                                   
+<span style="color:#f92672">[</span>Service<span style="color:#f92672">]</span>                                                                                                                          
+Nice<span style="color:#f92672">=</span><span style="color:#ae81ff">19</span>                                                                                                                            
+IOSchedulingClass<span style="color:#f92672">=</span>idle                                                                                                             
+KillSignal<span style="color:#f92672">=</span>SIGINT
+ExecStart<span style="color:#f92672">=</span>/usr/sbin/zpool scrub %i
+</code></pre></div><p>(the <code>@</code> is the systemd <a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html#Service%20Templates">&ldquo;service template&rdquo;</a> syntax)</p>
+<p>To periodically execute the scrub service, I also created <code>zfs-scrub@.timer</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo vi /etc/systemd/system/zfs-scrub@.timer
+<span style="color:#f92672">[</span>Unit<span style="color:#f92672">]</span>
+Description<span style="color:#f92672">=</span>Daily zpool scrub on %i
+
+<span style="color:#f92672">[</span>Timer<span style="color:#f92672">]</span>
+OnCalendar<span style="color:#f92672">=</span>daily <span style="color:#75715e"># &lt;- adjust this interval to suit your needs</span>
+AccuracySec<span style="color:#f92672">=</span>1h
+Persistent<span style="color:#f92672">=</span>true
+
+<span style="color:#f92672">[</span>Install<span style="color:#f92672">]</span>
+WantedBy<span style="color:#f92672">=</span>multi-user.target
+</code></pre></div><p>Finally, to wire everything up and schedule daily scrubs of my <code>/tank</code>, I enabled the timer:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl enable --now zfs-scrub@tank.timer
+</code></pre></div><p>Now, the tank will automatically be scrubbed every day at midnight!</p>
+<h3 id="zed">ZED</h3>
+<p>I don't want to have to log in to my server every morning to check the status of last night's zpool scrub. Wouldn't it be nice if I could just be notified of the results?</p>
+<p>ZED is the <a href="http://manpages.ubuntu.com/manpages/xenial/man8/zed.8.html">ZFS Event Daemon</a>. It watches for ZFS events (like a scrub completing) and reacts to those events (by, for example, sending an email). It comes with ZFS and can be enabled like:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl enable --now zfs-zed.service
+</code></pre></div><p>However, the default configuration probably doesn't know how to send emails correctly. I'm going to set ZED up to post mails to a local mail relay (postfix, via mailx), so I need to adjust the ZED config to send to my email, using <code>mail</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo vi /etc/zfs/zed.d/zed.rc
+...
+ZED_EMAIL_ADDR<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;your@email.com&#34;</span>
+ZED_EMAIL_PROG<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;mail&#34;</span>
+...
+$ sudo systemctl restart zfs-zed.service
+</code></pre></div><h3 id="postfix-mailx-and-gmail">Postfix, Mailx and Gmail:</h3>
+<p>I tested several combinations of mail relays, mail servers, and cli wrappers, and Postfix+Mailx is the combo that I landed on that works best with ZED. Other <code>sendmail</code> compatible programs <em>may</em> work, but I couldn't figure out how to make them play together.</p>
+<p>Install Postfix and Mailx:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo dnf install -y postfix mailx
+</code></pre></div><p>Setting up Postfix, Mailx and ZED is <a href="../postfix-gmail">continued in &ldquo;Configuring Postfix with Gmail&rdquo;.</a></p>
+<hr>
+<h4 id="toc">Read the other articles in this series here:</h4>
+<ul>
+<li><a href="../new-year-new-lab">New Year, New Lab</a></li>
+<li>#TODO - <a href="#TODO-epyc">Epyc EKWB liquid cooled server build</a></li>
+<li><a href="../zol-zed-postfix">ZFS on Linux, ZED, and Postfix</a></li>
+<li><a href="../postfix-gmail">Configuring Postfix with Gmail</a></li>
+<li><a href="../wireguard">WireGuard VPN mesh</a></li>
+<li><a href="../pihole-wireguard">PiHole and DNS over WireGuard</a></li>
+<li><a href="../coredns-localzone">Private DNS with CoreDNS</a></li>
+<li>#TODO - <a href="#TODO-vfio">VFIO GPU Passthrough</a></li>
+<li>#TODO - <a href="#TODO-networking">Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard</a></li>
+<li><a href="../recovering-fedora">Rescuing a bad Fedora upgrade via chroot</a></li>
+</ul>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h">Read other posts</span>
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+              <span class="button previous">
+                <a href="https://blog.rbtr.dev/posts/postfix-gmail/">
+                  <span class="button__icon">←</span>
+                  <span class="button__text">Configuring Postfix with Gmail</span>
+                </a>
+              </span>
+            
+            
+              <span class="button next">
+                <a href="https://blog.rbtr.dev/posts/recovering-fedora/">
+                  <span class="button__text">Recovering unbootable Fedora</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+    
+
+    
+      
+        
+
+      
+    
+    
+    </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+      <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+      <span>© 2020 Evan Baker </span>
+      <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://blog.rbtr.dev/assets/main.js"></script>
+<script src="https://blog.rbtr.dev/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>

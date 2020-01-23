@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/dnf-automatic/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/dnf/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/dnf-automatic/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/fedora/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/postfix/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/</loc>
+    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/adding-ip-addresses/</loc>
+    <lastmod>2020-01-14T17:24:44-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/ip/</loc>
+    <lastmod>2020-01-14T17:24:44-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/linux/</loc>
+    <lastmod>2020-01-14T17:24:44-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/coredns/</loc>
+    <lastmod>2020-01-11T15:32:04-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/coredns-localzone/</loc>
+    <lastmod>2020-01-11T15:32:04-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/systemd-resolved/</loc>
+    <lastmod>2020-01-11T15:32:04-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/wireguard/</loc>
+    <lastmod>2020-01-11T15:34:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/pihole/</loc>
+    <lastmod>2020-01-11T15:34:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/pihole-wireguard/</loc>
+    <lastmod>2020-01-11T15:34:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/vpn/</loc>
+    <lastmod>2020-01-09T17:40:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/wireguard/</loc>
+    <lastmod>2020-01-09T17:40:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/postfix-gmail/</loc>
+    <lastmod>2020-01-09T08:36:21-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/gmail/</loc>
+    <lastmod>2020-01-09T08:36:21-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/mailx/</loc>
+    <lastmod>2020-01-09T08:36:21-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/sendmail/</loc>
+    <lastmod>2020-01-09T08:36:21-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/zed/</loc>
+    <lastmod>2020-01-09T08:36:21-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/data/</loc>
+    <lastmod>2020-01-08T21:05:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/zfs/</loc>
+    <lastmod>2020-01-08T21:05:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/zol-zed-postfix/</loc>
+    <lastmod>2020-01-08T21:05:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/zfs-on-linux/</loc>
+    <lastmod>2020-01-08T21:05:00-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/chroot/</loc>
+    <lastmod>2020-01-07T11:09:22-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/grub2/</loc>
+    <lastmod>2020-01-07T11:09:22-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/recovering-fedora/</loc>
+    <lastmod>2020-01-07T11:09:22-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/epyc/</loc>
+    <lastmod>2020-01-06T11:09:22-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/new-year-new-lab/</loc>
+    <lastmod>2020-01-06T11:09:22-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/archive/</loc>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/categories/</loc>
+    <changefreq>daily</changefreq>
+  </url>
+  
+</urlset>

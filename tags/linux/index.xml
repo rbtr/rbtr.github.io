@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>linux on rbtr.dev</title>
+    <link>https://blog.rbtr.dev/tags/linux/</link>
+    <description>Recent content in linux on rbtr.dev</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 14 Jan 2020 17:24:44 -0500</lastBuildDate>
+    
+	<atom:link href="https://blog.rbtr.dev/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Adding Static IP Addresses</title>
+      <link>https://blog.rbtr.dev/posts/adding-ip-addresses/</link>
+      <pubDate>Tue, 14 Jan 2020 17:24:44 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/posts/adding-ip-addresses/</guid>
+      <description>Multiple static IP Addresses on Linux I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the address that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card&#39;s IP, and the other to the remaining IP&amp;hellip;but I didn&#39;t&amp;hellip;
+It turns out, in Linux it&#39;s possible for a network device to have multiple IP addresses!</description>
+    </item>
+    
+  </channel>
+</rss>

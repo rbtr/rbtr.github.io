@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on rbtr.dev</title>
+    <link>https://blog.rbtr.dev/tags/</link>
+    <description>Recent content in Tags on rbtr.dev</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 17 Jan 2020 08:32:32 -0500</lastBuildDate>
+    
+	<atom:link href="https://blog.rbtr.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>dnf</title>
+      <link>https://blog.rbtr.dev/tags/dnf/</link>
+      <pubDate>Fri, 17 Jan 2020 08:32:32 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/dnf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>dnf-automatic</title>
+      <link>https://blog.rbtr.dev/tags/dnf-automatic/</link>
+      <pubDate>Fri, 17 Jan 2020 08:32:32 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/dnf-automatic/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>fedora</title>
+      <link>https://blog.rbtr.dev/tags/fedora/</link>
+      <pubDate>Fri, 17 Jan 2020 08:32:32 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/fedora/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>postfix</title>
+      <link>https://blog.rbtr.dev/tags/postfix/</link>
+      <pubDate>Fri, 17 Jan 2020 08:32:32 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/postfix/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ip</title>
+      <link>https://blog.rbtr.dev/tags/ip/</link>
+      <pubDate>Tue, 14 Jan 2020 17:24:44 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/ip/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>linux</title>
+      <link>https://blog.rbtr.dev/tags/linux/</link>
+      <pubDate>Tue, 14 Jan 2020 17:24:44 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>coredns</title>
+      <link>https://blog.rbtr.dev/tags/coredns/</link>
+      <pubDate>Sat, 11 Jan 2020 15:32:04 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/coredns/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>systemd-resolved</title>
+      <link>https://blog.rbtr.dev/tags/systemd-resolved/</link>
+      <pubDate>Sat, 11 Jan 2020 15:32:04 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/systemd-resolved/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>wireguard</title>
+      <link>https://blog.rbtr.dev/tags/wireguard/</link>
+      <pubDate>Sat, 11 Jan 2020 15:32:04 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/wireguard/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pihole</title>
+      <link>https://blog.rbtr.dev/tags/pihole/</link>
+      <pubDate>Sat, 11 Jan 2020 12:13:00 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/tags/pihole/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

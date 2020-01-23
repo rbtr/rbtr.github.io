@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+      <title>Private DNS Zone with CoreDNS :: rbtr.dev — evan&#39;s blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
+I previously wrote about setting up a PiHole and configured all my devices on the network to use it and get ads blocked at the DNS level. I also set up my WireGuard connected clients to be able to take advantage of that appliance even when I&#39;m traveling - as long as I can establish a secure WireGuard tunnel."/>
+<meta name="keywords" content="podman, entrypoint, cmd, arguments, flags, coredns, systemd-resolved, wireguard, bind, dnssec, hosted zone, docker"/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://blog.rbtr.dev/posts/coredns-localzone/" />
+
+
+
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/assets/style.css">
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://blog.rbtr.dev/img/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://blog.rbtr.dev/img/favicon.png">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Private DNS Zone with CoreDNS"/>
+<meta name="twitter:description" content="Building a private hosted zone with CoreDNS"/>
+
+
+
+<meta property="og:title" content="Private DNS Zone with CoreDNS" />
+<meta property="og:description" content="Building a private hosted zone with CoreDNS" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.rbtr.dev/posts/coredns-localzone/" />
+<meta property="article:published_time" content="2020-01-11T15:32:04-05:00" />
+<meta property="article:modified_time" content="2020-01-11T15:32:04-05:00" /><meta property="og:site_name" content="rbtr.dev" />
+
+
+
+
+
+
+  </head>
+  <body class="themed dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/archive">Archive</a></li>
+        
+      
+        
+          <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+        
+      
+        
+          <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+        
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+      
+    
+      
+        <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none"/>
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  <div class="post">
+    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/coredns-localzone/">Private DNS Zone with CoreDNS</a></h2>
+    <div class="post-meta">
+      
+        <span class="post-date">
+            11 Jan 2020
+        </span>
+      
+      
+      
+        <span class="post-read-time">— 10 min read</span>
+      
+    </div>
+
+    
+      <span class="post-tags">
+        
+          #<a href="https://blog.rbtr.dev/tags/coredns/">coredns</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/systemd-resolved/">systemd-resolved</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/wireguard/">wireguard</a>&nbsp;
+        
+      </span>
+    
+
+    
+
+    <div class="post-content">
+      <hr>
+<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &lsquo;20s.</p>
+<p>I previously wrote about <a href="../pihole-wireguard">setting up a PiHole</a> and configured all my devices on the network to use it and get ads blocked at the DNS level. I also set up my WireGuard connected clients to be able to take advantage of that appliance even when I'm traveling - as long as I can establish a secure WireGuard tunnel.</p>
+<p>Today I'll be taking this local/private networking design further: using <a href="https://coredns.io/">CoreDNS</a> to serve a private hosted domain name zone so that I can get to my local devices and services via domain names instead of trying to remember IP addresses!</p>
+<p>My private zone is going to be <code>lz.example</code> (for localzone), and once we're done my PiHole admin service will be reachable at &ldquo;<a href="http://pihole.lz.example/admin%22">http://pihole.lz.example/admin&quot;</a>.</p>
+<h4 id="sections">Sections:</h4>
+<ul>
+<li><a href="#basic-coredns">Basic CoreDNS setup</a></li>
+<li><a href="#pihole">Moving the PiHole to a new port</a></li>
+<li><a href="#advanced-coredns">Advanced CoreDNS zone config</a></li>
+<li><a href="#resolved-wireguard">Split DNS with systemd-resolved</a></li>
+</ul>
+<hr>
+<h2 id="coredns">CoreDNS</h2>
+<p>In my <a href="../pihole-wireguard">PiHole post</a>, I configured the PiHole to be my whole network's DNS server so that I could block ads for all my devices. When I did that, I bound the PiHole to <code>192.168.0.9:53</code>, the default port for DNS traffic, and had my Gateway give out that IP address (<code>192.168.0.9</code>) to all my connected devices for their DNS server.</p>
+<p>Now that I want to inject CoreDNS in the DNS chain before PiHole, I will move the PiHole to a different port (<code>:153</code>) and run CoreDNS on <code>:53</code> so that I don't have to make any changes elsewhere in my network.</p>
+<p>Let's prepare the CoreDNS container and service so that we can switch with minimal downtime.</p>
+<hr>
+<h3 id="coredns-podman-container">CoreDNS Podman container</h3>
+<p>My <code>coredns.sh</code> container creation script looks like:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/bash
+</span><span style="color:#75715e"></span>podman create <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    --name coredns <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    --net host <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -v /etc/coredns:/conf:z <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    --entrypoint<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/coredns&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    coredns/coredns <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -conf /conf/Corefile
+</code></pre></div><p>There's a few odd things going on here, even compared to the <code>docker</code> equivalent.</p>
+<ul>
+<li>
+<p><code>--net host</code><br>
+I want to bind CoreDNS to <em>some</em> of the IP addresses my server has. The best way to do that is to run it in the host network namespace (skip container networking) and configure the application to bind to IPs and ports explicitly. More on that in the <a href="#corefile">Corefile</a> configuration below.</p>
+</li>
+<li>
+<p><code>--entrypoint=&quot;/coredns&quot;</code><br>
+Podman (due to a bug or by design) requires that an <code>entrypoint</code> is specified for the &ldquo;trailing args&rdquo; convention to work.<br>
+In <code>docker</code>, we're used to being able to specify args for the entrypoint right after the image name, like: <code>$ docker run library/busybox sleep 3600</code>. <code>sleep 3600</code> are arguments to the default image entrypoint (<code>/bin/sh</code> for busybox). But with Podman, trailing args are IGNORED unless the <code>entrypoint</code> is also specified at the command line.<br>
+This entrypoint is the default entrypoint, I have just restated it to get the args to work, and my args are are&hellip;</p>
+</li>
+<li>
+<p><code>-conf /conf/Corefile</code><br>
+I'm mounting in the host directory <code>/etc/coredns</code> to the container's <code>/conf</code>. This arg to CoreDNS tells it to use the <code>Corefile</code> in <code>/conf</code> as its configuration.</p>
+</li>
+</ul>
+<hr>
+<h3 id="management-the-unit-file">Management: the unit file</h3>
+<p>Like before, I also create simple a <code>systemd</code> service file to manage my container:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text"># /etc/systemd/system/coredns.service
+[Unit]
+Description=CoreDNS Podman container
+Wants=syslog.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/podman start -a coredns
+ExecStop=/usr/bin/podman stop -t 10 coredns
+
+[Install]
+WantedBy=multi-user.target
+</code></pre></div><p>Now we're set up to <em>run</em> CoreDNS, but we need to create and fill-in the Corefile so that it <em>does</em> something.</p>
+<hr>
+<h3 id="corefile">CoreDNS configuration: the Corefile</h3>
+<p>Since I'm just creating a MVP CoreDNS deployment to prevent service interuptions while I change the ports around for the PiHole before I create all the Zone configuration, my initial Corefile is very simple.</p>
+<p>I want to bind CoreDNS to port <code>:53</code>, and forward all requests to my PiHole, which I will be moving to <code>:153</code>. The Corefile is thus:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">#/etc/coredns/Corefile
+.:53 {                          # handle . (everything), bind to port 53
+    log                         # enables coredns logging
+    errors                      # logs errors
+    forward . 192.168.0.9:153  # forward . (everything) to PiHole on port 153
+}
+</code></pre></div><p>If I wanted to ensure that there is no DNS outage if the PiHole crashes, I can add additional DNS servers to after it on the <code>forward</code> line, like</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">forward . 192.168.0.9:153 1.1.1.1 8.8.8.8
+</code></pre></div><hr>
+<h3 id="running-coredns">Running CoreDNS</h3>
+<p>Now we can bring up CoreDNS by creating and starting the container:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo ./coredns.sh <span style="color:#f92672">&amp;&amp;</span> sudo systemctl enable --now coredns
+</code></pre></div><p>Then, we can check the status of the service:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl status coredns
+● coredns.service - CoreDNS Podman container
+   Loaded: loaded <span style="color:#f92672">(</span>/etc/systemd/system/coredns.service; enabled; vendor preset: disabled<span style="color:#f92672">)</span>
+   Active: failed <span style="color:#f92672">(</span>Result: exit-code<span style="color:#f92672">)</span> 
+  Process: ExecStart<span style="color:#f92672">=</span>/usr/bin/podman start -a coredns <span style="color:#f92672">(</span>code<span style="color:#f92672">=</span>exited, status<span style="color:#f92672">=</span>1/FAILURE<span style="color:#f92672">)</span>
+
+... myserver restart job, restart counter is at 5.
+... myserver systemd<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: Stopped CoreDNS Podman container.
+... myserver systemd<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: coredns.service: Start request repeated too quickly.
+... myserver systemd<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: coredns.service: Failed with result <span style="color:#e6db74">&#39;exit-code&#39;</span>.
+... myserver systemd<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>: Failed to start CoreDNS Podman container.
+</code></pre></div><p>Uh oh. Why is CoreDNS not starting?</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo podman logs coredns
+Listen: listen tcp 192.168.0.9:53: bind: address already in use
+Listen: listen tcp 192.168.0.9:53: bind: address already in use
+Listen: listen tcp 192.168.0.9:53: bind: address already in use
+Listen: listen tcp 192.168.0.9:53: bind: address already in use
+Listen: listen tcp 192.168.0.9:53: bind: address already in use
+</code></pre></div><p>Ah. Right&hellip;the PiHole is still using that port. Let's move it.</p>
+<h2 id="pihole">Moving PiHole to a different port</h2>
+<p>Here's my <code>pihole.sh</code> creation script, from my post on <a href="../pihole-wireguard">running PiHole</a>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/bash
+</span><span style="color:#75715e"></span>podman create <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    --name pihole <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 53:53/tcp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 53:53/udp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 67:67/udp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 80:80/tcp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 443:443/tcp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -e TZ<span style="color:#f92672">=</span>America/Chicago <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -v /etc/pihole/pihole:/etc/pihole:z <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -v /etc/pihole/dnsmasq.d:/etc/dnsmasq.d:z <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    pihole/pihole:latest
+</code></pre></div><p>I'm going to make a small change, then we'll redeploy everything. I'm changing the <code>hostport</code> on the port forwards from <code>53</code> to <code>153</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/bash
+</span><span style="color:#75715e"></span>podman create <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    --name pihole <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 153:53/tcp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 153:53/udp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 67:67/udp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 80:80/tcp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -p 443:443/tcp <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -e TZ<span style="color:#f92672">=</span>America/Chicago <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -v /etc/pihole/pihole:/etc/pihole:z <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    -v /etc/pihole/dnsmasq.d:/etc/dnsmasq.d:z <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    pihole/pihole:latest
+</code></pre></div><p>Note I don't need to change the container port, just the hostport.</p>
+<p>Now, I can stop and clean up the running PiHole container, redeploy, and start CoreDNS. I want to do this in quick succession so that there's no DNS outage for the devices on my network.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl stop pihole coredns
+$ sudo podman rm pihole
+$ sudo ./pihole.sh
+$ sudo systemctl start pihole coredns
+</code></pre></div><p>Now, I should see pihole and coredns services running and happy:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl status coredns
+● coredns.service - CoreDNS Podman container
+   Loaded: loaded <span style="color:#f92672">(</span>/etc/systemd/system/coredns.service; enabled; vendor preset: disabled<span style="color:#f92672">)</span>
+   Active: active <span style="color:#f92672">(</span>running<span style="color:#f92672">)</span> 
+   CGroup: /system.slice/coredns.service
+           └─1731018 /usr/bin/podman start -a coredns
+
+$ sudo systemctl status pihole
+● pihole.service - PiHole Podman container
+   Loaded: loaded <span style="color:#f92672">(</span>/etc/systemd/system/pihole.service; enabled; vendor preset: disabled<span style="color:#f92672">)</span>
+   Active: active <span style="color:#f92672">(</span>running<span style="color:#f92672">)</span> 
+   CGroup: /system.slice/pihole.service
+           └─3815011 /usr/bin/podman start -a pihole
+</code></pre></div><p>And I should be able to do the same ad-blocking DNS lookup test via CoreDNS that I previously did directly with the PiHole, since CoreDNS forwards all request to the PiHole!</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ dig doubleclick.net @192.168.0.9
+
+; &lt;&lt;&gt;&gt; DiG 9.11.14-RedHat-9.11.14-2.fc31 &lt;&lt;&gt;&gt; doubleclick.net @192.168.0.9
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER<span style="color:#e6db74">&lt;&lt;- opco</span>de: QUERY, status: NOERROR, id: <span style="color:#ae81ff">58220</span>
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: <span style="color:#ae81ff">1</span>
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: <span style="color:#ae81ff">4096</span>
+;; QUESTION SECTION:
+;doubleclick.net.               IN      A
+
+;; ANSWER SECTION:
+doubleclick.net.        <span style="color:#ae81ff">2</span>       IN      A       0.0.0.0
+
+;; Query time: <span style="color:#ae81ff">0</span> msec
+;; SERVER: 192.168.0.9#53<span style="color:#f92672">(</span>192.168.0.9<span style="color:#f92672">)</span>
+;; WHEN: Tue Jan <span style="color:#ae81ff">14</span> 13:03:02 CST <span style="color:#ae81ff">2020</span>
+;; MSG SIZE  rcvd: <span style="color:#ae81ff">75</span>
+</code></pre></div><p>If I were watching CoreDNS logs (<code>$ sudo podman logs --follow coredns</code>), I would see that DNS query come through, and I can see in the response that <code>0.0.0.0</code> was returned for the lookup meaning everything is working great :)</p>
+<hr>
+<h2 id="advanced-coredns">CoreDNS Zone Config</h2>
+<p>Now that CoreDNS is running and we've moved the PiHole so that they're all part of our query chain we can do the fun part (and the real subject of this blog) - create a local hosted zone for private DNS name resolution. As a reminder, I'm going to be creating the <code>lz.example</code> zone for mapping <code>svc.lz.example</code> style names to devices on my LAN with private IP addresses.</p>
+<p>We need to create a BIND-style zone file for CoreDNS to load. This file contains all the records for our local zone. I'm not very familiar with the zonefile syntax, so I heavily referenced (this how-to)[https://blog.idempotent.ca/2018/04/18/run-your-own-home-dns-on-coredns/] on CoreDNS and zone files to build mine.</p>
+<p>My zonefile is <code>/etc/coredns/db.example.lz</code> and contains the following:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">$TTL    604800
+@       IN      SOA     dns.lz.example.     admin.lz.example.   (
+        3       ;       Serial
+        604800  ;       Refresh
+        86400   ;       Retry
+        2419200 ;       Expire
+        604800  )       ;       Negative Cache TTL
+
+; Name Servers - NS Records
+@       IN      NS      dns
+; Name Servers - A records
+dns.lz.example.     IN      A       192.168.0.9
+; Device mappings - A Records
+myserver.lz.example. IN      A       192.168.0.11
+</code></pre></div><p>This is sufficient to map my first record - <code>myserver.lz.example. -&gt; 192.168.0.11</code>.</p>
+<p>Now we just need to go back to the Corefile and tell CoreDNS how to use this zonefile.</p>
+<p>Our Corefile currently contains:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">.:53 {                          # handle . (everything), bind to port 53
+    log                         # enables coredns logging
+    errors                      # logs errors
+    forward . 192.168.0.9:153  # forward . (everything) to PiHole on port 153
+}
+</code></pre></div><p>We need to change a couple of things. We need to tell CoreDNS to use our zonefile to add DNS information to it's context. We also need to tell it to NOT forward queries about our private zone to its upstream DNS servers (the PiHole, Cloudflare, Google, etc). These changes are:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">.:53 {        
+    file /conf/db.example.lz lz.example     # include zone data from this file
+    log
+    errors            
+    forward . 192.168.0.9:153 1.1.1.1 {
+        except lz.example                   # don&#39;t forward local zone queries
+        policy sequential
+    }
+}
+</code></pre></div><p>A quick restart of CoreDNS later&hellip; (<code>$ sudo systemctl restart coredns</code>) we now test local zone DNS resolution:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ dig myserver.lz.example @192.158.0.53
+
+; &lt;&lt;&gt;&gt; DiG 9.11.14-RedHat-9.11.14-2.fc31 &lt;&lt;&gt;&gt; myserver.lz.example @192.168.0.9
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER<span style="color:#e6db74">&lt;&lt;- opco</span>de: QUERY, status: NOERROR, id: <span style="color:#ae81ff">7743</span>
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: <span style="color:#ae81ff">1</span>
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: <span style="color:#ae81ff">4096</span>
+; COOKIE: 24e7a7807f3383d3 <span style="color:#f92672">(</span>echoed<span style="color:#f92672">)</span>
+;; QUESTION SECTION:
+;myserver.lz.example.              IN      A
+
+;; ANSWER SECTION:
+myserver.lz.example.       <span style="color:#ae81ff">604800</span>  IN      A       192.168.0.11
+
+;; AUTHORITY SECTION:
+lz.example.                 <span style="color:#ae81ff">604800</span>  IN      NS      dns.lz.example.
+
+;; Query time: <span style="color:#ae81ff">0</span> msec
+;; SERVER: 192.168.0.9#53<span style="color:#f92672">(</span>192.168.0.9<span style="color:#f92672">)</span>
+;; WHEN: Tue Jan <span style="color:#ae81ff">14</span> 13:38:45 CST <span style="color:#ae81ff">2020</span>
+;; MSG SIZE  rcvd: <span style="color:#ae81ff">119</span>
+</code></pre></div><p><strong>Success!</strong></p>
+<p>Note that Chrome does not like fake TLDs and will try to <em>Search</em> them instead of resolving them. If you're running webservices on your private zone, always include a trailing slash to force Chrome to resolve: <code>http://myserver.lz.example/</code></p>
+<hr>
+<h2 id="resolved-wireguard">Split DNS with systemd-resolved</h2>
+<p>One cool side-effect of the above is that the devices we previously configured to send DNS traffic over WireGuard just work with the new local zones. However, on some devices I don't want to send <em>all</em> my DNS to my hosted CoreDNS - like if I'm on a corporate network that has it's own private DNS zone that I need to be able to resolve.</p>
+<p>To handle this, we can set up systemd-resolved to forward DNS queries for certain domains to certain resolvers. For example, I want to send queries for <code>*.lz.example</code> offsite to my CoreDNS server, over WireGuard.</p>
+<p>The <code>systemd-resolved</code> drop-ins go in <code>/etc/systemd/resolved.conf.d</code>, so let's create one:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text"># /etc/systmed/resolved.conf.d/00-example.lz
+[Resolve]
+DNS=172.16.4.1      # the wireguard peer where coredns is running
+Domains=~lz.example
+DNSSEC=false
+</code></pre></div><p>Then if we <code>$ sudo systemctl restart systemd-resolved</code>, we can <code>dig</code> just like above and will receive the same response even when we're not on the LAN!</p>
+<p>This lets us navigate to privately hosted services without exposing webservers or anything else to the public internet from inside our LAN, so it's an awesome system for the security and privacy of our homelab services.</p>
+<hr>
+<h4 id="toc">Read the other articles in this series here:</h4>
+<ul>
+<li><a href="../new-year-new-lab">New Year, New Lab</a></li>
+<li>#TODO - <a href="#TODO-epyc">Epyc EKWB liquid cooled server build</a></li>
+<li><a href="../zol-zed-postfix">ZFS on Linux, ZED, and Postfix</a></li>
+<li><a href="../postfix-gmail">Configuring Postfix with Gmail</a></li>
+<li><a href="../wireguard">WireGuard VPN mesh</a></li>
+<li><a href="../pihole-wireguard">PiHole and DNS over WireGuard</a></li>
+<li><a href="../coredns-localzone">Private DNS with CoreDNS</a></li>
+<li>#TODO - <a href="#TODO-vfio">VFIO GPU Passthrough</a></li>
+<li>#TODO - <a href="#TODO-networking">Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard</a></li>
+<li><a href="../recovering-fedora">Rescuing a bad Fedora upgrade via chroot</a></li>
+</ul>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h">Read other posts</span>
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+              <span class="button previous">
+                <a href="https://blog.rbtr.dev/posts/adding-ip-addresses/">
+                  <span class="button__icon">←</span>
+                  <span class="button__text">Adding Static IP Addresses</span>
+                </a>
+              </span>
+            
+            
+              <span class="button next">
+                <a href="https://blog.rbtr.dev/posts/pihole-wireguard/">
+                  <span class="button__text">PiHole and DNS over WireGuard</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+    
+
+    
+      
+        
+
+      
+    
+    
+    </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+      <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+      <span>© 2020 Evan Baker </span>
+      <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://blog.rbtr.dev/assets/main.js"></script>
+<script src="https://blog.rbtr.dev/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>

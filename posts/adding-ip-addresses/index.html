@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+      <title>Adding Static IP Addresses :: rbtr.dev — evan&#39;s blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="Multiple static IP Addresses on Linux I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the address that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card&#39;s IP, and the other to the remaining IP&amp;hellip;but I didn&#39;t&amp;hellip;
+It turns out, in Linux it&#39;s possible for a network device to have multiple IP addresses!"/>
+<meta name="keywords" content="ip, linux, ifconfig, wireguard, dns"/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://blog.rbtr.dev/posts/adding-ip-addresses/" />
+
+
+
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/assets/style.css">
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://blog.rbtr.dev/img/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://blog.rbtr.dev/img/favicon.png">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Adding Static IP Addresses"/>
+<meta name="twitter:description" content="Setting multiple IPs on an interface in Linux"/>
+
+
+
+<meta property="og:title" content="Adding Static IP Addresses" />
+<meta property="og:description" content="Setting multiple IPs on an interface in Linux" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.rbtr.dev/posts/adding-ip-addresses/" />
+<meta property="article:published_time" content="2020-01-14T17:24:44-05:00" />
+<meta property="article:modified_time" content="2020-01-14T17:24:44-05:00" /><meta property="og:site_name" content="rbtr.dev" />
+
+
+
+
+
+
+  </head>
+  <body class="themed dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/archive">Archive</a></li>
+        
+      
+        
+          <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+        
+      
+        
+          <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+        
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+      
+    
+      
+        <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none"/>
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  <div class="post">
+    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/adding-ip-addresses/">Adding Static IP Addresses</a></h2>
+    <div class="post-meta">
+      
+        <span class="post-date">
+            14 Jan 2020
+        </span>
+      
+      
+      
+        <span class="post-read-time">— 2 min read</span>
+      
+    </div>
+
+    
+      <span class="post-tags">
+        
+          #<a href="https://blog.rbtr.dev/tags/ip/">ip</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/linux/">linux</a>&nbsp;
+        
+      </span>
+    
+
+    
+
+    <div class="post-content">
+      <hr>
+<h2 id="multiple-static-ip-addresses-on-linux">Multiple static IP Addresses on Linux</h2>
+<p>I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the <em>address</em> that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card's IP, and the other to the remaining IP&hellip;but I didn't&hellip;</p>
+<p>It turns out, in Linux it's possible for a network device to have multiple IP addresses! I can assign several IPs and then bind them independently.</p>
+<h3 id="temporarily-adding-an-ip-address-to-a-device">Temporarily adding an IP address to a device</h3>
+<p>Initially to test this out we can just add an IP address to a device. This will not persist through a reboot but it is sufficient to prove that our apps will run one-per-IP.</p>
+<p>First, check the available network devices with <code>ifconfig</code> or <code>ip</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ ifconfig
+lo: ...
+wlp59s0: ...
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN 
+...
+2: wlp59s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">1500</span> qdisc noqueue 
+...
+</code></pre></div><p>I'm going to add an IP address to <code>wlp59s0</code>. It already has an IP, as we can see in the output of <code>ip addr</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ ip addr show dev wlp59s0
+2: wlp59s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">1500</span> qdisc noqueue state UP group default qlen <span style="color:#ae81ff">1000</span>
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.14/24 brd 192.168.0.255 scope global dynamic 
+</code></pre></div><p>This device has been assigned <code>192.168.0.14</code> by the router. I want it to also have <code>192.168.0.15</code>.</p>
+<blockquote>
+<p>Note: you might want to check the client leases in your router, or at least run <code>$ arp -a</code> to see what else is active in your subnet, so that you don't pick an IP that is already assigned to another device.</p>
+</blockquote>
+<p>To add the IP address, we can use the <code>ip</code> command again:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo ip address add dev wlp59s0 192.168.0.15/24
+</code></pre></div><p>That's it!</p>
+<h3 id="permanently-assigning-ips-to-a-device">Permanently assigning IPs to a device</h3>
+<p>To make our testing changes permanent we can assign static IP addresses via <code>systemd-networkd</code>.</p>
+<p>In Fedora, networkd is configured via drop-ins in <code>/etc/sysconfig/network-scripts/</code>. I will editing the drop-in named <code>ifcfg-wlp59s0</code> - if a static IP address was already configured on this interface then the file may already exist - otherwise it should be created with this content:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text"># /etc/sysconfig/network-scripts/ifcfg-wlp59s0
+IPADDR0=&#34;192.168.0.14&#34;
+IPADDR1=&#34;192.168.0.15&#34;
+</code></pre></div><p>Now, we can reboot and check <code>$ ip addr</code> and we'll see that our device has both of the static addresses that we've configured! :)</p>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h">Read other posts</span>
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+              <span class="button previous">
+                <a href="https://blog.rbtr.dev/posts/dnf-automatic/">
+                  <span class="button__icon">←</span>
+                  <span class="button__text">Automatic updates on Fedora</span>
+                </a>
+              </span>
+            
+            
+              <span class="button next">
+                <a href="https://blog.rbtr.dev/posts/coredns-localzone/">
+                  <span class="button__text">Private DNS Zone with CoreDNS</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+    
+
+    
+      
+        
+
+      
+    
+    
+    </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+      <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+      <span>© 2020 Evan Baker </span>
+      <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://blog.rbtr.dev/assets/main.js"></script>
+<script src="https://blog.rbtr.dev/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>

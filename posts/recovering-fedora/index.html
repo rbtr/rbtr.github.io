@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+      <title>Recovering unbootable Fedora :: rbtr.dev — evan&#39;s blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
+Today I&#39;ll be attempting to recover a machine that failed a Fedora version upgrade (v29-&amp;gt;v30) and now won&#39;t boot.
+Sections:  Troubleshooting Broken GRUB Booting a Live USB and chrooting Data transfer with rsync   Troubleshooting GRUB When we try to boot the machine, we&#39;re greeted with the following prompt:
+grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the config or the the files it needs to boot the OS (the initramfs)."/>
+<meta name="keywords" content="blog,rbtr,aws,cloud,kubernetes,epyc,amd,vfio,iommu,fedora,linux,boot,grub"/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://blog.rbtr.dev/posts/recovering-fedora/" />
+
+
+
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/assets/style.css">
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://blog.rbtr.dev/img/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://blog.rbtr.dev/img/favicon.png">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Recovering unbootable Fedora"/>
+<meta name="twitter:description" content="Salvaging a failed upgrade with chroot"/>
+
+
+
+<meta property="og:title" content="Recovering unbootable Fedora" />
+<meta property="og:description" content="Salvaging a failed upgrade with chroot" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.rbtr.dev/posts/recovering-fedora/" />
+<meta property="article:published_time" content="2020-01-07T11:09:22-05:00" />
+<meta property="article:modified_time" content="2020-01-07T11:09:22-05:00" /><meta property="og:site_name" content="rbtr.dev" />
+
+
+
+
+
+
+  </head>
+  <body class="themed dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/archive">Archive</a></li>
+        
+      
+        
+          <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+        
+      
+        
+          <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+        
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+      
+    
+      
+        <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none"/>
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  <div class="post">
+    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/recovering-fedora/">Recovering unbootable Fedora</a></h2>
+    <div class="post-meta">
+      
+        <span class="post-date">
+            7 Jan 2020
+        </span>
+      
+      
+      
+        <span class="post-read-time">— 7 min read</span>
+      
+    </div>
+
+    
+      <span class="post-tags">
+        
+          #<a href="https://blog.rbtr.dev/tags/fedora/">fedora</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/grub2/">grub2</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/chroot/">chroot</a>&nbsp;
+        
+      </span>
+    
+
+    
+
+    <div class="post-content">
+      <hr>
+<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &lsquo;20s.</p>
+<p>Today I'll be attempting to recover a machine that failed a Fedora version upgrade (v29-&gt;v30) and now won't boot.</p>
+<h4 id="sections">Sections:</h4>
+<ul>
+<li><a href="#broken-grub">Troubleshooting Broken GRUB</a></li>
+<li><a href="#live-usb">Booting a Live USB and chrooting</a></li>
+<li><a href="#data-transfer">Data transfer with rsync</a></li>
+</ul>
+<hr>
+<h2 id="broken-grub">Troubleshooting GRUB</h2>
+<p>When we try to boot the machine, we're greeted with the following prompt:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">grub&gt;
+</code></pre></div><p>This usually indicates that <em>GRUB</em> is okay but it can't find the config or the the files it needs to boot the OS (the initramfs). We can poke around in the GRUB prompt to see if anything is obviously out of place. <a href="https://www.howtoforge.com/tutorial/repair-linux-boot-with-grub-rescue/">This GRUB command reference</a> has some useful exploratory tools.</p>
+<p>Executing <code>ls</code> shows bootable devices:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">grub&gt; ls
+<span style="color:#f92672">(</span>hd0<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>hd0,msdos1<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>hd0,msdos2<span style="color:#f92672">)</span>
+</code></pre></div><p>One of these should have a <code>grub2/</code> directory, so we can <code>ls</code> them individually until we find it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">grub&gt; ls <span style="color:#f92672">(</span>hd0,msdos1<span style="color:#f92672">)</span>/
+...
+grub2
+...
+</code></pre></div><p>I checked that the <code>prefix</code> was what I expected it to be (<code>(hd0,1)/grub2</code>), then tried <code>set prefix</code> and <code>set root</code> just to be sure, but <code>boot</code> still just returned us to the <code>grub&gt;</code> prompt. No dice.</p>
+<h2 id="live-usb">Booting a Linux USB and chrooting</h2>
+<p>Something's clearly wrong between GRUB and the initramfs, and GRUB CLI does not have the capability for us to fix it. Time to boot a Linux live environment and try to recover it from a more full-featured system.</p>
+<p>The only bootable USB that was on-site was an Ubuntu 18.04 disk&hellip;which may or may not be a problem since we're troubleshooting Fedora&hellip; but let's try.</p>
+<p>So I get someone to put the disk in, reset the machine, and mash F11 to get to the BIOS boot menu, and&hellip; no USB is listed. Fine. Try another port? &hellip;no USB listed. Try another port? &hellip;there it is!</p>
+<p>The Ubuntu installer comes up, so we &ldquo;Try Ubuntu&rdquo; to get the live environment to boot. A <code>$ sudo systemctl start ssh</code> gives an error, so we <code>$ sudo apt install openssh-server</code> and <code>$ sudo systemctl start ssh</code> again. At this point we still can't ssh in because the default user (<code>ubuntu</code>) does not have a password set, so we set that with <code>$ sudo passwd ubuntu</code>, and finally, FINALLY, we can log in to the machine - albeit with a totally different, temporary OS booted.</p>
+<h3 id="mounting-disks">Mounting disks</h3>
+<p>We need to identify and mount the disks before we can chroot in. These <a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/Multiboot_Guide/common_operations_appendix.html">docs on chroot troubleshooting</a> from the Fedora 22 are still helpful here.
+We can get a quick overview of our disks with <code>lskblk</code>, and Ubuntu should even show us the LVM volumes:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo lsblk
+...
+sde               8:64   <span style="color:#ae81ff">0</span> 111.8G  <span style="color:#ae81ff">0</span> disk
+├─sde1            8:65   <span style="color:#ae81ff">0</span>     1G  <span style="color:#ae81ff">0</span> part
+└─sde2            8:66   <span style="color:#ae81ff">0</span> 110.8G  <span style="color:#ae81ff">0</span> part
+  ├─fedora-swap 253:0    <span style="color:#ae81ff">0</span>   7.9G  <span style="color:#ae81ff">0</span> lvm
+  └─fedora-root 253:1    <span style="color:#ae81ff">0</span>    15G  <span style="color:#ae81ff">0</span> lvm
+</code></pre></div><p>I mounted my <code>fedora-root</code> to <code>/mnt/fedora</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo mount /dev/mapper/fedora-root /mnt/fedora
+</code></pre></div><p>and then mounted <code>/dev/sde1</code>, which I identified as my GRUB partition, in to that:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo mount /dev/sde1 /mnt/fedora/boot/
+</code></pre></div><p>then mounted <code>/dev</code>, <code>/proc</code>, and <code>/sys</code> from the Ubuntu host:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#66d9ef">for</span> dir in /dev /proc /sys; <span style="color:#66d9ef">do</span> sudo mount --bind $dir /mnt/fedora/$dir ; <span style="color:#66d9ef">done</span>
+</code></pre></div><p>Now that everything is mounted, we can <code>chroot</code> and work in Fedora:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo chroot /mnt/fedora
+</code></pre></div><h3 id="recovering-the-fedora-install">Recovering the Fedora install</h3>
+<h4 id="dnf-upgrade">dnf upgrade</h4>
+<p>The first thing I tried was updating packages, which failed:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ dnf upgrade -y
+Fedora Modular <span style="color:#ae81ff">30</span> - x86_64 - Updates                                                               0.0  B/s |   <span style="color:#ae81ff">0</span>  B     00:00    
+Error: Failed to download metadata <span style="color:#66d9ef">for</span> repo <span style="color:#e6db74">&#39;updates-modular&#39;</span>: Cannot prepare internal mirrorlist: Curl error <span style="color:#f92672">(</span>6<span style="color:#f92672">)</span>: Couldn<span style="color:#960050;background-color:#1e0010">&#39;</span>t resolve host name <span style="color:#66d9ef">for</span> https://mirrors.fedoraproject.org/metalink?repo<span style="color:#f92672">=</span>updates-released-modular-f30&amp;arch<span style="color:#f92672">=</span>x86_64 <span style="color:#f92672">[</span>Could not resolve host: mirrors.fedoraproject.org<span style="color:#f92672">]</span>
+</code></pre></div><p>Why did this fail?</p>
+<p>When we try to check the DNS settings in <code>/etc/resolv.conf</code>, we get an unusual error:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ cat /etc/resolv.conf
+cat: /etc/resolv.conf: No such file or directory
+</code></pre></div><p>That file should exist. And if we <code>stat</code> it, it indeed does:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ stat /etc/resolv.conf
+  File: /etc/resolv.conf -&gt; /var/run/NetworkManager/resolv.conf
+  Size: <span style="color:#ae81ff">35</span>              Blocks: <span style="color:#ae81ff">0</span>          IO Block: <span style="color:#ae81ff">4096</span>   symbolic link
+Device: fd01h/64769d    Inode: <span style="color:#ae81ff">8449420</span>     Links: <span style="color:#ae81ff">1</span>
+Access: <span style="color:#f92672">(</span>0777/lrwxrwxrwx<span style="color:#f92672">)</span>  Uid: <span style="color:#f92672">(</span>    0/    root<span style="color:#f92672">)</span>   Gid: <span style="color:#f92672">(</span>    0/    root<span style="color:#f92672">)</span>
+...
+</code></pre></div><p>The important thing to notice here is <code>symbolic link</code>, and where it's pointing - <code>-&gt; /var/run/NetworkManager/resolv.conf</code>. The problem is that Fedora uses NetworkManager. NetworkManager controls DNS resolution, by putting a symlink in <code>/etc/resolv.conf</code> to it's own runtime <code>resolv.conf</code>. But because we're in a chroot - the system is not &ldquo;booted&rdquo;, exactly, and has not init process - NetworkManager is not running. It also can't be started with <code>$ systemctl start NetworkManager</code> because, again, we're chrooted and systemd won't start processes in a chroot.</p>
+<p>We can fix this temporarily by writing our own <code>/etc/resolv.conf</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mv /etc/resolv.conf /etc/resolv.conf.bak
+$ echo <span style="color:#e6db74">&#34;nameserver 8.8.8.8&#34;</span> &gt; /etc/resolv.conf
+</code></pre></div><p>and now if we retry the DNF update, it resolves the repos and succeeeds.</p>
+<h4 id="grub-and-the-initramfs">Grub and the initramfs</h4>
+<p>Now we can rebuild the initramfs with the latest updates that are installed. My booted kernel version was <code>4.15</code> but my Fedora install has <code>5.3</code> so I need to specific the latest installed kernel version when calling <code>dracut</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ dracut -v -f /boot/initramfs-5.3.16-200.fc30.x86_64.img 5.3.16-200.fc30.x86_64 
+</code></pre></div><p>With the initramfs built, we can also write a new grub config to resolve the boot issue:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ grub2-mkconfig -o /boot/grub2/grub.cfg
+</code></pre></div><p>And reboot, letting it boot from the internal drive instead of the USB this time.</p>
+<h2 id="data-transfer">Data transfer</h2>
+<p>I need to transfer several TBs of data across my LAN, with some individual files in the 10s of GB range each. There are several tools available for this (I like the looks of <a href="https://github.com/schollz/croc">croc</a>, but don't want to use a public relay server and I don't want to learn how to configure a private one right now).<br>
+I'm going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull mode to transfer my data. This is also known as &ldquo;daemonized&rdquo; or &ldquo;remote-source&rdquo; rsync. I'm also going to leverage <a href="https://linux.die.net/man/1/screen">screen</a> to be able to detach from the rsync session while leaving it running in the background.</p>
+<hr>
+<p>On the source machine, we need to create an rsync config in <code>/etc/rsyncd.conf</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[data] # name your rsync server share
+    path = /path/to/data # path to data for rsync to share
+    read only = yes # don&#39;t let rsync write to the share
+    timeout = 30
+</code></pre></div><p>and then start the rsync daemon with:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ rsync -D
+</code></pre></div><hr>
+<p>On the destination machine, I'm going to run rsync in a screen so I can detach from it without killing the transfer, and reattach to check the progress. I'll create a screen session name &ldquo;rsync&rdquo; with:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ screen -S rsync
+</code></pre></div><p>This drops me right in to the screen session. The screen incantations I'll be using from within screen to detach, create, and move around are:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Keys</th>
+<th align="right">Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>&lt;Ctrl-A&gt;+d</code></td>
+<td align="right">Detach</td>
+</tr>
+<tr>
+<td align="left"><code>&lt;Ctrl-A&gt;+c</code></td>
+<td align="right">Create new nested screen</td>
+</tr>
+<tr>
+<td align="left"><code>&lt;Ctrl-A&gt;+n</code></td>
+<td align="right">Move to next screen</td>
+</tr>
+</tbody>
+</table>
+<p>And the screen flags to find and reattach to a session are:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Command</th>
+<th align="right">Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">$ screen -ls</td>
+<td align="right">List sessions</td>
+</tr>
+<tr>
+<td align="left">$ screen -r name</td>
+<td align="right">Reattach to screen name &ldquo;name&rdquo;</td>
+</tr>
+</tbody>
+</table>
+<p>With the rsync daemon running on the recovered machine, serving &ldquo;data&rdquo;, we can run rsync on the destination machine in &ldquo;remote-source&rdquo; mode. I'm copying the files on to my ZFS pool:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ rsync -avhzP --inplace 192.168.0.10::data/a /tank/recovered/data/a
+</code></pre></div><p>Rsync should be logging the transfer status to stdout in the terminal, showing us how things are going. Note, rsync is serial (un-parallelized), so I created a next screen and ran <code>iftop</code> and <code>htop</code> just to see if it was saturating my network or CPU (it was neither), checked the same thing on the source machine (neither), and then started a second, parallel sync of another directory (<code>::data/b</code>) to take advantage of my gig LAN, fast disk, and multicore CPUs. Repeat as needed - aim to fully saturate the network - and parallize up to 1.5X the number of threads in the system before rsync will start getting CPU bound. I'm able to read data reasonably fast due my drive array being RAID10, but unstriped data reads slower and could bottleneck on disk I/O before saturating either network or CPU. If adding an <code>rsync</code> process doesn't increase either of CPU or network usage you've probably maxed out your disks.</p>
+<hr>
+<h4 id="toc">Read the other articles in this series here:</h4>
+<ul>
+<li><a href="../new-year-new-lab">New Year, New Lab</a></li>
+<li>#TODO - <a href="#TODO-epyc">Epyc EKWB liquid cooled server build</a></li>
+<li><a href="../zol-zed-postfix">ZFS on Linux, ZED, and Postfix</a></li>
+<li><a href="../postfix-gmail">Configuring Postfix with Gmail</a></li>
+<li><a href="../wireguard">WireGuard VPN mesh</a></li>
+<li><a href="../pihole-wireguard">PiHole and DNS over WireGuard</a></li>
+<li><a href="../coredns-localzone">Private DNS with CoreDNS</a></li>
+<li>#TODO - <a href="#TODO-vfio">VFIO GPU Passthrough</a></li>
+<li>#TODO - <a href="#TODO-networking">Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard</a></li>
+<li><a href="../recovering-fedora">Rescuing a bad Fedora upgrade via chroot</a></li>
+</ul>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h">Read other posts</span>
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+              <span class="button previous">
+                <a href="https://blog.rbtr.dev/posts/zol-zed-postfix/">
+                  <span class="button__icon">←</span>
+                  <span class="button__text">ZFS on Linux, ZED, and Postfix</span>
+                </a>
+              </span>
+            
+            
+              <span class="button next">
+                <a href="https://blog.rbtr.dev/posts/new-year-new-lab/">
+                  <span class="button__text">New Year, New Lab</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+    
+
+    
+      
+        
+
+      
+    
+    
+    </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+      <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+      <span>© 2020 Evan Baker </span>
+      <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://blog.rbtr.dev/assets/main.js"></script>
+<script src="https://blog.rbtr.dev/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>

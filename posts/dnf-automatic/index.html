@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    
+      <title>Automatic updates on Fedora :: rbtr.dev — evan&#39;s blog</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="Update strategies Today I&#39;m setting up automatic updates on all of my Fedora machines.
+There are several school&#39;s of thought regarding keeping your systems up to date. In the cloud space recently the buzzword has been &amp;ldquo;immutable infrastructure&amp;rdquo; - the idea that your virtual-server&#39;s base operating system is fixed - effectively read-only - and you perform system updates by deploying new virtual machines and deleting the old ones. I can&#39;t throw my laptop away every time there&#39;s a new kernel version out, so this doesn&#39;t work for me!"/>
+<meta name="keywords" content="dnf, fedora, dnf-automatic, postfix, updates, auto update, package, packages, package manager, apt, apt-get, yum, postfix, mailx, sendmail, motd, linux"/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://blog.rbtr.dev/posts/dnf-automatic/" />
+
+
+
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/assets/style.css">
+
+
+<link rel="stylesheet" href="https://blog.rbtr.dev/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://blog.rbtr.dev/img/apple-touch-icon-144-precomposed.png">
+<link rel="shortcut icon" href="https://blog.rbtr.dev/img/favicon.png">
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Automatic updates on Fedora"/>
+<meta name="twitter:description" content="Keeping Fedora up to date with dnf-automatic"/>
+
+
+
+<meta property="og:title" content="Automatic updates on Fedora" />
+<meta property="og:description" content="Keeping Fedora up to date with dnf-automatic" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.rbtr.dev/posts/dnf-automatic/" />
+<meta property="article:published_time" content="2020-01-17T08:32:32-05:00" />
+<meta property="article:modified_time" content="2020-01-17T08:32:32-05:00" /><meta property="og:site_name" content="rbtr.dev" />
+
+
+
+
+
+
+  </head>
+  <body class="themed dark-theme">
+    <div class="container">
+      <header class="header">
+  <span class="header__inner">
+    <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+    <span class="header__right">
+      
+        <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/archive">Archive</a></li>
+        
+      
+        
+          <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+        
+      
+        
+          <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+        
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/archive">Archive</a></li>
+      
+    
+      
+        <li><a href="https://linkedin.com/in/ebaker8">About</a></li>
+      
+    
+      
+        <li><a href="https://github.com/rbtr/rbtr.github.io">GitHub</a></li>
+      
+    
+  </ul>
+</nav>
+
+        <span class="menu-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M0 0h24v24H0z" fill="none"/>
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </span>
+      
+      <span class="theme-toggle">
+        <svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+
+      </span>
+    </span>
+  </span>
+</header>
+
+
+      <div class="content">
+        
+  <div class="post">
+    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/dnf-automatic/">Automatic updates on Fedora</a></h2>
+    <div class="post-meta">
+      
+        <span class="post-date">
+            17 Jan 2020
+        </span>
+      
+      
+      
+        <span class="post-read-time">— 3 min read</span>
+      
+    </div>
+
+    
+      <span class="post-tags">
+        
+          #<a href="https://blog.rbtr.dev/tags/fedora/">fedora</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/dnf/">dnf</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/dnf-automatic/">dnf-automatic</a>&nbsp;
+        
+          #<a href="https://blog.rbtr.dev/tags/postfix/">postfix</a>&nbsp;
+        
+      </span>
+    
+
+    
+
+    <div class="post-content">
+      <hr>
+<h2 id="update-strategies">Update strategies</h2>
+<p>Today I'm setting up automatic updates on all of my Fedora machines.</p>
+<p>There are several school's of thought regarding keeping your systems up to date. In the cloud space recently the buzzword has been &ldquo;immutable infrastructure&rdquo; - the idea that your virtual-server's base operating system is fixed - effectively read-only - and you perform system updates by deploying new virtual machines and deleting the old ones. I can't throw my laptop away every time there's a new kernel version out, so this doesn't work for me!</p>
+<p>A slightly more traditional stance is that the system should be frozen until updates are approved, and then there is a period of downtime when just those approved updates are applied. This is a typical risk-averse enterprise datacenter approach - only apply critical security updates, and apply those manually after a lengthy approval and test process.</p>
+<p>These approaches are good for reliability and compatibility - your servers are running the same thing they've been running forever so it's unlikely they will suddenly present issues. If you replace the whole virtual instance instead of upgrading in-place then you can test your application on the new instances before destroying the old ones. And if you're applying critical security patches on bare-metal, at least you have a very short list of exactly what's being changed in case something weird does happen.</p>
+<p>Then there is the typical desktop update cycle - you check regularly or get notified that updates are available, and invoke the updater (i.e. <code>dnf upgrade</code>, <code>apt upgrade</code>, etc) at your leisure. You can be as picky or not about the packages that are updated by doing things like package pinning or specifying full version names at install.</p>
+<p>There are more opinions about this stuff than I can list, obviously, but you get the idea. There's a full spectrum of positions from &ldquo;un-updateable&rdquo; to &ldquo;bleeding-edge&rdquo; with arguments to be made for them all.</p>
+<p>On personal equipment, I like my systems to stay up to date. I also don't like manually <code>ssh</code>ing around to update them. And in the unlikely event that an update breaks something&hellip;well, it's not prod, it's just a homelab :)</p>
+<h3 id="automatic-updates-with-dnf-automatic">Automatic updates with DNF Automatic</h3>
+<p><code>dnf-automatic</code> is a useful utility on Fedora for partially or fully automating package updates. I'm going to set it to apply all updates automatically so that I don't have to ever run <code>dnf upgrade</code> by hand again.</p>
+<p>To get started, we'll install it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo dnf install dnf-automatic
+</code></pre></div><p>The configuration file is located in <code>/etc/dnf/automatic.conf</code>. The file is well commented, so have a read through to see what can be tuned. I like the options for <code>upgrade_type</code> - if you only wanted <code>security</code> upgrades to be applied automatically, just set it to that.</p>
+<p>I'm going to set these options:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">apply_updates = yes
+emit_via = command_email,motd,stdio
+[email_command]
+email_from = dnf-automatic&lt;root@myserver&gt;
+email_to = your@email.com
+</code></pre></div><p>The <code>[email_command]</code> options being set enable <code>dnf-automatic</code> to post emails to my Gmail using the same setup that I detailed <a href="../postfix-gmail">in my post on setting up Postfix with Gmail</a> for daily ZFS scrub report emails. I don't have to do any additional config with the emailer and will get a summary of the updates applied to this server from <code>dnf-automatic</code> in my inbox!</p>
+<p>I'm happy with the default scheduling that comes with <code>dnf-automatic</code>, but if you wanted to check for updates more or less frequently, the timer unit <code>/usr/lib/systemd/system/dnf-automatic.timer</code> has the crontab:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">...
+[Timer]
+OnCalendar=*-*-* 6:00
+...
+</code></pre></div><p>Adjust that to suit your update schedule if you need to.</p>
+<p>And finally we can enable that timer to regularly check for and apply updates:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl enable --now dnf-automatic.timer
+</code></pre></div><p>Now relax and let your system keep itself up to date!</p>
+
+    </div>
+    
+      
+        <div class="pagination">
+          <div class="pagination__title">
+            <span class="pagination__title-h">Read other posts</span>
+            <hr />
+          </div>
+          <div class="pagination__buttons">
+            
+            
+              <span class="button next">
+                <a href="https://blog.rbtr.dev/posts/adding-ip-addresses/">
+                  <span class="button__text">Adding Static IP Addresses</span>
+                  <span class="button__icon">→</span>
+                </a>
+              </span>
+            
+          </div>
+        </div>
+      
+    
+    
+
+    
+      
+        
+
+      
+    
+    
+    </div>
+
+      </div>
+
+      
+        <footer class="footer">
+  <div class="footer__inner">
+      <a href="/" class="logo" style="text-decoration: none;">
+  
+    <span class="logo__mark"><svg xmlns="http://www.w3.org/2000/svg" class="greater-icon" viewBox="0 0 44 44">
+  <path fill="none" d="M15 8l14.729 14.382L15 35.367"/>
+</svg>
+</span>
+    <span class="logo__text">blog.rbtr.dev</span>
+    <span class="logo__cursor themed dark-theme"></span>
+  
+</a>
+
+      <span>© 2020 Evan Baker </span>
+      <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://blog.rbtr.dev/assets/main.js"></script>
+<script src="https://blog.rbtr.dev/assets/prism.js"></script>
+
+
+      
+    </div>
+
+    
+  </body>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>dnf-automatic on rbtr.dev</title>
+    <link>https://blog.rbtr.dev/tags/dnf-automatic/</link>
+    <description>Recent content in dnf-automatic on rbtr.dev</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 17 Jan 2020 08:32:32 -0500</lastBuildDate>
+    
+	<atom:link href="https://blog.rbtr.dev/tags/dnf-automatic/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Automatic updates on Fedora</title>
+      <link>https://blog.rbtr.dev/posts/dnf-automatic/</link>
+      <pubDate>Fri, 17 Jan 2020 08:32:32 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/posts/dnf-automatic/</guid>
+      <description>Update strategies Today I&#39;m setting up automatic updates on all of my Fedora machines.
+There are several school&#39;s of thought regarding keeping your systems up to date. In the cloud space recently the buzzword has been &amp;ldquo;immutable infrastructure&amp;rdquo; - the idea that your virtual-server&#39;s base operating system is fixed - effectively read-only - and you perform system updates by deploying new virtual machines and deleting the old ones. I can&#39;t throw my laptop away every time there&#39;s a new kernel version out, so this doesn&#39;t work for me!</description>
+    </item>
+    
+  </channel>
+</rss>

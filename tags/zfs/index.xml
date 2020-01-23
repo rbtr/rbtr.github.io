@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>zfs on rbtr.dev</title>
+    <link>https://blog.rbtr.dev/tags/zfs/</link>
+    <description>Recent content in zfs on rbtr.dev</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 08 Jan 2020 21:05:00 -0500</lastBuildDate>
+    
+	<atom:link href="https://blog.rbtr.dev/tags/zfs/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ZFS on Linux, ZED, and Postfix</title>
+      <link>https://blog.rbtr.dev/posts/zol-zed-postfix/</link>
+      <pubDate>Wed, 08 Jan 2020 21:05:00 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/posts/zol-zed-postfix/</guid>
+      <description>This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
+I have a few TB of data that&#39;s been living in a Btrfs array on an underpowered FX &amp;ldquo;server&amp;rdquo; that I want to move to a more robust ZFS array in the new Epyc server. This describes setting up ZFS on Linux, ZED, and Postfix+Mailx for regular filesystem status emails.
+Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS is an enterprise filesystem created by Sun for OpenSolaris more than 15 years ago.</description>
+    </item>
+    
+    <item>
+      <title>New Year, New Lab</title>
+      <link>https://blog.rbtr.dev/posts/new-year-new-lab/</link>
+      <pubDate>Mon, 06 Jan 2020 11:09:22 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/posts/new-year-new-lab/</guid>
+      <description>It was an extraordinarily busy and educational past year for me, working in the cloud computing space. In preparation for the &amp;lsquo;20s, I spent the (not-so-)quiet time off of work at the end of last year rebuilding several home networks, installing and configuring personal servers, and otherwise leveling-up my homelabs - redoing and improving things now that I know better. This multiparter is a log of that!
+Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKWB liquid cooled server build ZFS on Linux, ZED, and Postfix Configuring Postfix with Gmail WireGuard VPN mesh PiHole and DNS over WireGuard Private DNS with CoreDNS #TODO - VFIO GPU Passthrough #TODO - Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard Rescuing a bad Fedora upgrade via chroot  Where we started Note: when I say &amp;ldquo;site&amp;rdquo;, I mean &amp;ldquo;mine or a family member&#39;s home&amp;rdquo;.</description>
+    </item>
+    
+  </channel>
+</rss>
