@@ -138,7 +138,7 @@ It turns out, in Linux it&amp;rsquo;s possible for a network device to have mult
 
       
       
-        <span class="post-read-time">— 2 min read</span>
+        <span class="post-read-time">— 3 min read</span>
       
     </div>
 
@@ -184,12 +184,26 @@ wlp59s0: ...
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo ip address add dev wlp59s0 192.168.0.15/24
 </code></pre></div><p>That&rsquo;s it!</p>
 <h3 id="permanently-assigning-ips-to-a-device">Permanently assigning IPs to a device</h3>
-<p>To make our testing changes permanent we can assign static IP addresses via <code>systemd-networkd</code>.</p>
-<p>In Fedora, networkd is configured via drop-ins in <code>/etc/sysconfig/network-scripts/</code>. I will editing the drop-in named <code>ifcfg-wlp59s0</code> - if a static IP address was already configured on this interface then the file may already exist - otherwise it should be created with this content:</p>
+<p>To make our testing changes permanent we can assign static IP. In GDE we can do this through the Networking system settings pane, but we can also do it by manually by writing a network config file.</p>
+<h4 id="networkmanager">NetworkManager</h4>
+<p>By default in Fedora, networking is managed by NetworkManager and manually configured via drop-ins in <code>/etc/sysconfig/network-scripts/</code>. I will editing the drop-in named <code>ifcfg-wlp59s0</code> - if a static IP address was already configured on this interface then the file may already exist - otherwise it should be created with this content:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text"># /etc/sysconfig/network-scripts/ifcfg-wlp59s0
 IPADDR0=&#34;192.168.0.14&#34;
 IPADDR1=&#34;192.168.0.15&#34;
-</code></pre></div><p>Now, we can reboot and check <code>$ ip addr</code> and we&rsquo;ll see that our device has both of the static addresses that we&rsquo;ve configured! :)</p>
+</code></pre></div><h4 id="systemd-networkd">systemd-networkd</h4>
+<p>On some systems (especially servers), networking may be managed by <code>systemd-networkd</code>. This is less common on laptops or for WiFi devices because it is relatively static.</p>
+<p>We can edit an interface&rsquo;s networkd config file to add a static IP address like so:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text"># /etc/systemd/network/wlp59s0.conf
+[Match]
+Name=wlp59s0
+
+[Network]
+...
+Address=192.168.0.14/24 # Note that this CIDR indicates the subnet range for this LAN
+Address=192.168.0.15/24
+...
+</code></pre></div><h3 id="reboot-to-check-persistence">Reboot to check persistence</h3>
+<p>Now, we can reboot and check <code>$ ip addr</code> and we&rsquo;ll see that our device has both of the static addresses that we&rsquo;ve configured! :)</p>
 
     </div>
     
