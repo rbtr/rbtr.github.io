@@ -2,6 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>epyc on rbtr.dev</title>
+    
+    
+    
     <link>https://blog.rbtr.dev/tags/epyc/</link>
     <description>Recent content in epyc on rbtr.dev</description>
     <generator>Hugo -- gohugo.io</generator>
@@ -17,8 +20,18 @@
       <pubDate>Mon, 06 Jan 2020 11:09:22 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/new-year-new-lab/</guid>
-      <description>It was an extraordinarily busy and educational past year for me, working in the cloud computing space. In preparation for the &amp;lsquo;20s, I spent the (not-so-)quiet time off of work at the end of last year rebuilding several home networks, installing and configuring personal servers, and otherwise leveling-up my homelabs - redoing and improving things now that I know better. This multiparter is a log of that!
-Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKWB liquid cooled server build ZFS on Linux, ZED, and Postfix Configuring Postfix with Gmail WireGuard VPN mesh PiHole and DNS over WireGuard Private DNS with CoreDNS #TODO - VFIO GPU Passthrough #TODO - Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard Rescuing a bad Fedora upgrade via chroot  Where we started Note: when I say &amp;ldquo;site&amp;rdquo;, I mean &amp;ldquo;mine or a family member&#39;s home&amp;rdquo;.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Leveling up the homelab
+          
+        
+        </description>
     </item>
     
   </channel>

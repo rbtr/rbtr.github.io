@@ -2,6 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on rbtr.dev</title>
+    
+    
+    
     <link>https://blog.rbtr.dev/categories/</link>
     <description>Recent content in Categories on rbtr.dev</description>
     <generator>Hugo -- gohugo.io</generator>

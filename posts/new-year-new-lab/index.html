@@ -6,8 +6,8 @@
     
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="description" content="It was an extraordinarily busy and educational past year for me, working in the cloud computing space. In preparation for the &amp;lsquo;20s, I spent the (not-so-)quiet time off of work at the end of last year rebuilding several home networks, installing and configuring personal servers, and otherwise leveling-up my homelabs - redoing and improving things now that I know better. This multiparter is a log of that!
-Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKWB liquid cooled server build ZFS on Linux, ZED, and Postfix Configuring Postfix with Gmail WireGuard VPN mesh PiHole and DNS over WireGuard Private DNS with CoreDNS #TODO - VFIO GPU Passthrough #TODO - Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard Rescuing a bad Fedora upgrade via chroot  Where we started Note: when I say &amp;ldquo;site&amp;rdquo;, I mean &amp;ldquo;mine or a family member&#39;s home&amp;rdquo;."/>
+<meta name="description" content="It was an extraordinarily busy and educational past year for me, working in the cloud computing space. In preparation for the &amp;rsquo;20s, I spent the (not-so-)quiet time off of work at the end of last year rebuilding several home networks, installing and configuring personal servers, and otherwise leveling-up my homelabs - redoing and improving things now that I know better. This multiparter is a log of that!
+Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKWB liquid cooled server build ZFS on Linux, ZED, and Postfix Configuring Postfix with Gmail WireGuard VPN mesh PiHole and DNS over WireGuard Private DNS with CoreDNS #TODO - VFIO GPU Passthrough #TODO - Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard Rescuing a bad Fedora upgrade via chroot  Where we started Note: when I say &amp;ldquo;site&amp;rdquo;, I mean &amp;ldquo;mine or a family member&amp;rsquo;s home&amp;rdquo;."/>
 <meta name="keywords" content="blog,rbtr,aws,cloud,kubernetes,epyc,amd,vfio,iommu,fedora,linux,boot,grub"/>
 <meta name="robots" content="noodp"/>
 <link rel="canonical" href="https://blog.rbtr.dev/posts/new-year-new-lab/" />
@@ -45,7 +45,7 @@ Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKW
 
 
   </head>
-  <body class="themed dark-theme">
+  <body class="dark-theme">
     <div class="container">
       <header class="header">
   <span class="header__inner">
@@ -56,7 +56,7 @@ Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKW
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 
@@ -120,14 +120,22 @@ Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKW
 
       <div class="content">
         
+  
+  
+
   <div class="post">
-    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/new-year-new-lab/">New Year, New Lab</a></h2>
+    <h1 class="post-title"><a href="https://blog.rbtr.dev/posts/new-year-new-lab/">New Year, New Lab</a></h1>
     <div class="post-meta">
       
         <span class="post-date">
-            6 Jan 2020
+          6 Jan 2020
         </span>
+
+        
+          
+        
       
+
       
       
         <span class="post-read-time">— 3 min read</span>
@@ -151,8 +159,9 @@ Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKW
     
 
     <div class="post-content">
+      
       <hr>
-<p>It was an extraordinarily busy and educational past year for me, working in the cloud computing space. In preparation for the &lsquo;20s, I spent the (not-so-)quiet time off of work at the end of last year rebuilding several home networks, installing and configuring personal servers, and otherwise leveling-up my homelabs - redoing and improving things now that I know better. This multiparter is a log of that!</p>
+<p>It was an extraordinarily busy and educational past year for me, working in the cloud computing space. In preparation for the &rsquo;20s, I spent the (not-so-)quiet time off of work at the end of last year rebuilding several home networks, installing and configuring personal servers, and otherwise leveling-up my homelabs - redoing and improving things now that I know better. This multiparter is a log of that!</p>
 <h4 id="toc">Read the other articles in this series here:</h4>
 <ul>
 <li><a href="../new-year-new-lab">New Year, New Lab</a></li>
@@ -167,17 +176,17 @@ Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKW
 <li><a href="../recovering-fedora">Rescuing a bad Fedora upgrade via chroot</a></li>
 </ul>
 <h2 id="where-we-started">Where we started</h2>
-<p>Note: when I say &ldquo;site&rdquo;, I mean &ldquo;mine or a family member's home&rdquo;. If you read something here that makes you go &ldquo;that's not good enough!&quot;, like my current lack of RAIDZ&hellip; it's a HOMElab :)<br>
-I have 3 sites that I'm going to be refreshing during this process. Two have <a href="#TODO-ref-unifi">UniFi</a> gear; the third has comparable small-business equipment that is not centrally/cloud managed. They all have several POE WAPs, dozens of wireless clients, and a handful of wired clients. More detail in the <a href="#TODO-networking">Networking</a> post.</p>
-<p>There's only one existing &ldquo;server&rdquo; - aging, cheap, commodity hardware (AMD FX-6300, yikes!) and it recently failed an OS upgrade and has been stuck at:</p>
+<p>Note: when I say &ldquo;site&rdquo;, I mean &ldquo;mine or a family member&rsquo;s home&rdquo;. If you read something here that makes you go &ldquo;that&rsquo;s not good enough!&quot;, like my current lack of RAIDZ&hellip; it&rsquo;s a HOMElab :)<br>
+I have 3 sites that I&rsquo;m going to be refreshing during this process. Two have <a href="#TODO-ref-unifi">UniFi</a> gear; the third has comparable small-business equipment that is not centrally/cloud managed. They all have several POE WAPs, dozens of wireless clients, and a handful of wired clients. More detail in the <a href="#TODO-networking">Networking</a> post.</p>
+<p>There&rsquo;s only one existing &ldquo;server&rdquo; - aging, cheap, commodity hardware (AMD FX-6300, yikes!) and it recently failed an OS upgrade and has been stuck at:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">grub&gt;
-</code></pre></div><p>for months. It's &ldquo;offsite&rdquo; - several hundred miles from where I live - and no one technical is present there. It's a challenge troubleshooting over the phone (reading out terminal commands letter by letter is painful), which was a major motivator for the real <a href="https://www.supermicro.com/en/products/motherboard/H11SSL-i">Supermicro server board</a> going in to the <a href="#TODO-epyc">Epyc build</a> - it has IPMI! I'm going to attempt to save my data and rescue that install via an Ubuntu live USB, SSH, and chroot in the <a href="#TODO-rescuing">Rescuing</a> post.</p>
+</code></pre></div><p>for months. It&rsquo;s &ldquo;offsite&rdquo; - several hundred miles from where I live - and no one technical is present there. It&rsquo;s a challenge troubleshooting over the phone (reading out terminal commands letter by letter is painful), which was a major motivator for the real <a href="https://www.supermicro.com/en/products/motherboard/H11SSL-i">Supermicro server board</a> going in to the <a href="#TODO-epyc">Epyc build</a> - it has IPMI! I&rsquo;m going to attempt to save my data and rescue that install via an Ubuntu live USB, SSH, and chroot in the <a href="#TODO-rescuing">Rescuing</a> post.</p>
 <p>The FX server has several TBs of data on it in a 4 drive <a href="#TODO-btrfs-ref">Btrfs</a> RAID10, but one of drives has started failing and Btrfs is having trouble removing it. The one</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo btrfs scrub
-</code></pre></div><p>that I attempted ran for a week and then threw a few hundred million disk errors. Though degraded, the array is still readable; a priority is going to be <a href="../recovering-fedora/#data-transfer">offloading that data</a> so that those disks can be wiped and replaced. To improve the filesystem integrity for the future, real server will have a <a href="#TODO-zfs">ZFS pool</a> because <a href="#TODO-quote-ref">&ldquo;either you care about your data and you use ZFS, or you don't&rdquo;</a>. [Note: Yes, a <a href="#TODO-3-2-1-ref">3-2-1 strategy</a> is the only way to go if you <em>really</em> care about your data, but this isn't production data, and that's expensive $$$]</p>
-<p>Further, there's no existing point-to-point VPN set up, even though most of the gateways support IPSec or OpenVPN&hellip;I've been getting by with opening 22/TCP in the firewall and SSH port forwarding. Instead of setting that up, we'll leapfrog it entirely and set up a <a href="#TODO-wireguard">secure WireGuard mesh</a> - an encrypted overlay network that will let us peer with the other LANs to make remote access of these networks safe and secure.</p>
-<p>The Epyc server is also going to host an always-on, GPU passthrough'd <a href="#TODO-vfio">Windows virtual machine</a>. This VM is going to replace a standalone Windows desktop and that hardware is going to be repurposed. Don't worry, the <a href="#TODO-epyc#bom">server</a> is going to have resources to spare and it should be quite performant even with the VM pegged out.</p>
-<p>Next, let's get on with the <a href="#TODO-epyc">Epyc server build</a>, or you can jump to any of the other write-ups in this series <a href="#toc">here</a>.</p>
+</code></pre></div><p>that I attempted ran for a week and then threw a few hundred million disk errors. Though degraded, the array is still readable; a priority is going to be <a href="../recovering-fedora/#data-transfer">offloading that data</a> so that those disks can be wiped and replaced. To improve the filesystem integrity for the future, real server will have a <a href="#TODO-zfs">ZFS pool</a> because <a href="#TODO-quote-ref">&ldquo;either you care about your data and you use ZFS, or you don&rsquo;t&rdquo;</a>. [Note: Yes, a <a href="#TODO-3-2-1-ref">3-2-1 strategy</a> is the only way to go if you <em>really</em> care about your data, but this isn&rsquo;t production data, and that&rsquo;s expensive $$$]</p>
+<p>Further, there&rsquo;s no existing point-to-point VPN set up, even though most of the gateways support IPSec or OpenVPN&hellip;I&rsquo;ve been getting by with opening 22/TCP in the firewall and SSH port forwarding. Instead of setting that up, we&rsquo;ll leapfrog it entirely and set up a <a href="#TODO-wireguard">secure WireGuard mesh</a> - an encrypted overlay network that will let us peer with the other LANs to make remote access of these networks safe and secure.</p>
+<p>The Epyc server is also going to host an always-on, GPU passthrough&rsquo;d <a href="#TODO-vfio">Windows virtual machine</a>. This VM is going to replace a standalone Windows desktop and that hardware is going to be repurposed. Don&rsquo;t worry, the <a href="#TODO-epyc#bom">server</a> is going to have resources to spare and it should be quite performant even with the VM pegged out.</p>
+<p>Next, let&rsquo;s get on with the <a href="#TODO-epyc">Epyc server build</a>, or you can jump to any of the other write-ups in this series <a href="#toc">here</a>.</p>
 
     </div>
     
@@ -201,7 +210,7 @@ I have 3 sites that I'm going to be refreshing during this process. Two have <a 
         </div>
       
     
-    
+
 
     
       
@@ -209,7 +218,7 @@ I have 3 sites that I'm going to be refreshing during this process. Two have <a 
 
       
     
-    
+
     </div>
 
       </div>
@@ -224,7 +233,7 @@ I have 3 sites that I'm going to be refreshing during this process. Two have <a 
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 

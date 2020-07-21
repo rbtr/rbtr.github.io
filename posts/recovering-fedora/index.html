@@ -6,10 +6,10 @@
     
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-Today I&#39;ll be attempting to recover a machine that failed a Fedora version upgrade (v29-&amp;gt;v30) and now won&#39;t boot.
-Sections:  Troubleshooting Broken GRUB Booting a Live USB and chrooting Data transfer with rsync   Troubleshooting GRUB When we try to boot the machine, we&#39;re greeted with the following prompt:
-grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the config or the the files it needs to boot the OS (the initramfs)."/>
+<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;rsquo;20s.
+Today I&amp;rsquo;ll be attempting to recover a machine that failed a Fedora version upgrade (v29-&amp;gt;v30) and now won&amp;rsquo;t boot.
+Sections:  Troubleshooting Broken GRUB Booting a Live USB and chrooting Data transfer with rsync   Troubleshooting GRUB When we try to boot the machine, we&amp;rsquo;re greeted with the following prompt:
+grub&amp;gt; This usually indicates that GRUB is okay but it can&amp;rsquo;t find the config or the the files it needs to boot the OS (the initramfs)."/>
 <meta name="keywords" content="blog,rbtr,aws,cloud,kubernetes,epyc,amd,vfio,iommu,fedora,linux,boot,grub"/>
 <meta name="robots" content="noodp"/>
 <link rel="canonical" href="https://blog.rbtr.dev/posts/recovering-fedora/" />
@@ -47,7 +47,7 @@ grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the 
 
 
   </head>
-  <body class="themed dark-theme">
+  <body class="dark-theme">
     <div class="container">
       <header class="header">
   <span class="header__inner">
@@ -58,7 +58,7 @@ grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the 
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 
@@ -122,14 +122,22 @@ grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the 
 
       <div class="content">
         
+  
+  
+
   <div class="post">
-    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/recovering-fedora/">Recovering unbootable Fedora</a></h2>
+    <h1 class="post-title"><a href="https://blog.rbtr.dev/posts/recovering-fedora/">Recovering unbootable Fedora</a></h1>
     <div class="post-meta">
       
         <span class="post-date">
-            7 Jan 2020
+          7 Jan 2020
         </span>
+
+        
+          
+        
       
+
       
       
         <span class="post-read-time">— 7 min read</span>
@@ -151,9 +159,10 @@ grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the 
     
 
     <div class="post-content">
+      
       <hr>
-<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &lsquo;20s.</p>
-<p>Today I'll be attempting to recover a machine that failed a Fedora version upgrade (v29-&gt;v30) and now won't boot.</p>
+<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &rsquo;20s.</p>
+<p>Today I&rsquo;ll be attempting to recover a machine that failed a Fedora version upgrade (v29-&gt;v30) and now won&rsquo;t boot.</p>
 <h4 id="sections">Sections:</h4>
 <ul>
 <li><a href="#broken-grub">Troubleshooting Broken GRUB</a></li>
@@ -162,9 +171,9 @@ grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the 
 </ul>
 <hr>
 <h2 id="broken-grub">Troubleshooting GRUB</h2>
-<p>When we try to boot the machine, we're greeted with the following prompt:</p>
+<p>When we try to boot the machine, we&rsquo;re greeted with the following prompt:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">grub&gt;
-</code></pre></div><p>This usually indicates that <em>GRUB</em> is okay but it can't find the config or the the files it needs to boot the OS (the initramfs). We can poke around in the GRUB prompt to see if anything is obviously out of place. <a href="https://www.howtoforge.com/tutorial/repair-linux-boot-with-grub-rescue/">This GRUB command reference</a> has some useful exploratory tools.</p>
+</code></pre></div><p>This usually indicates that <em>GRUB</em> is okay but it can&rsquo;t find the config or the the files it needs to boot the OS (the initramfs). We can poke around in the GRUB prompt to see if anything is obviously out of place. <a href="https://www.howtoforge.com/tutorial/repair-linux-boot-with-grub-rescue/">This GRUB command reference</a> has some useful exploratory tools.</p>
 <p>Executing <code>ls</code> shows bootable devices:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">grub&gt; ls
 <span style="color:#f92672">(</span>hd0<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>hd0,msdos1<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>hd0,msdos2<span style="color:#f92672">)</span>
@@ -175,10 +184,10 @@ grub2
 ...
 </code></pre></div><p>I checked that the <code>prefix</code> was what I expected it to be (<code>(hd0,1)/grub2</code>), then tried <code>set prefix</code> and <code>set root</code> just to be sure, but <code>boot</code> still just returned us to the <code>grub&gt;</code> prompt. No dice.</p>
 <h2 id="live-usb">Booting a Linux USB and chrooting</h2>
-<p>Something's clearly wrong between GRUB and the initramfs, and GRUB CLI does not have the capability for us to fix it. Time to boot a Linux live environment and try to recover it from a more full-featured system.</p>
-<p>The only bootable USB that was on-site was an Ubuntu 18.04 disk&hellip;which may or may not be a problem since we're troubleshooting Fedora&hellip; but let's try.</p>
+<p>Something&rsquo;s clearly wrong between GRUB and the initramfs, and GRUB CLI does not have the capability for us to fix it. Time to boot a Linux live environment and try to recover it from a more full-featured system.</p>
+<p>The only bootable USB that was on-site was an Ubuntu 18.04 disk&hellip;which may or may not be a problem since we&rsquo;re troubleshooting Fedora&hellip; but let&rsquo;s try.</p>
 <p>So I get someone to put the disk in, reset the machine, and mash F11 to get to the BIOS boot menu, and&hellip; no USB is listed. Fine. Try another port? &hellip;no USB listed. Try another port? &hellip;there it is!</p>
-<p>The Ubuntu installer comes up, so we &ldquo;Try Ubuntu&rdquo; to get the live environment to boot. A <code>$ sudo systemctl start ssh</code> gives an error, so we <code>$ sudo apt install openssh-server</code> and <code>$ sudo systemctl start ssh</code> again. At this point we still can't ssh in because the default user (<code>ubuntu</code>) does not have a password set, so we set that with <code>$ sudo passwd ubuntu</code>, and finally, FINALLY, we can log in to the machine - albeit with a totally different, temporary OS booted.</p>
+<p>The Ubuntu installer comes up, so we &ldquo;Try Ubuntu&rdquo; to get the live environment to boot. A <code>$ sudo systemctl start ssh</code> gives an error, so we <code>$ sudo apt install openssh-server</code> and <code>$ sudo systemctl start ssh</code> again. At this point we still can&rsquo;t ssh in because the default user (<code>ubuntu</code>) does not have a password set, so we set that with <code>$ sudo passwd ubuntu</code>, and finally, FINALLY, we can log in to the machine - albeit with a totally different, temporary OS booted.</p>
 <h3 id="mounting-disks">Mounting disks</h3>
 <p>We need to identify and mount the disks before we can chroot in. These <a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/Multiboot_Guide/common_operations_appendix.html">docs on chroot troubleshooting</a> from the Fedora 22 are still helpful here.
 We can get a quick overview of our disks with <code>lskblk</code>, and Ubuntu should even show us the LVM volumes:</p>
@@ -214,7 +223,7 @@ cat: /etc/resolv.conf: No such file or directory
 Device: fd01h/64769d    Inode: <span style="color:#ae81ff">8449420</span>     Links: <span style="color:#ae81ff">1</span>
 Access: <span style="color:#f92672">(</span>0777/lrwxrwxrwx<span style="color:#f92672">)</span>  Uid: <span style="color:#f92672">(</span>    0/    root<span style="color:#f92672">)</span>   Gid: <span style="color:#f92672">(</span>    0/    root<span style="color:#f92672">)</span>
 ...
-</code></pre></div><p>The important thing to notice here is <code>symbolic link</code>, and where it's pointing - <code>-&gt; /var/run/NetworkManager/resolv.conf</code>. The problem is that Fedora uses NetworkManager. NetworkManager controls DNS resolution, by putting a symlink in <code>/etc/resolv.conf</code> to it's own runtime <code>resolv.conf</code>. But because we're in a chroot - the system is not &ldquo;booted&rdquo;, exactly, and has not init process - NetworkManager is not running. It also can't be started with <code>$ systemctl start NetworkManager</code> because, again, we're chrooted and systemd won't start processes in a chroot.</p>
+</code></pre></div><p>The important thing to notice here is <code>symbolic link</code>, and where it&rsquo;s pointing - <code>-&gt; /var/run/NetworkManager/resolv.conf</code>. The problem is that Fedora uses NetworkManager. NetworkManager controls DNS resolution, by putting a symlink in <code>/etc/resolv.conf</code> to it&rsquo;s own runtime <code>resolv.conf</code>. But because we&rsquo;re in a chroot - the system is not &ldquo;booted&rdquo;, exactly, and has not init process - NetworkManager is not running. It also can&rsquo;t be started with <code>$ systemctl start NetworkManager</code> because, again, we&rsquo;re chrooted and systemd won&rsquo;t start processes in a chroot.</p>
 <p>We can fix this temporarily by writing our own <code>/etc/resolv.conf</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mv /etc/resolv.conf /etc/resolv.conf.bak
 $ echo <span style="color:#e6db74">&#34;nameserver 8.8.8.8&#34;</span> &gt; /etc/resolv.conf
@@ -226,8 +235,8 @@ $ echo <span style="color:#e6db74">&#34;nameserver 8.8.8.8&#34;</span> &gt; /etc
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ grub2-mkconfig -o /boot/grub2/grub.cfg
 </code></pre></div><p>And reboot, letting it boot from the internal drive instead of the USB this time.</p>
 <h2 id="data-transfer">Data transfer</h2>
-<p>I need to transfer several TBs of data across my LAN, with some individual files in the 10s of GB range each. There are several tools available for this (I like the looks of <a href="https://github.com/schollz/croc">croc</a>, but don't want to use a public relay server and I don't want to learn how to configure a private one right now).<br>
-I'm going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull mode to transfer my data. This is also known as &ldquo;daemonized&rdquo; or &ldquo;remote-source&rdquo; rsync. I'm also going to leverage <a href="https://linux.die.net/man/1/screen">screen</a> to be able to detach from the rsync session while leaving it running in the background.</p>
+<p>This isn&rsquo;t the first time this machine has flaked out, so I want to migrate data off of it preventatively. I need to transfer several TBs of data across my LAN, with some individual files in the 10s of GB range each. There are several tools available for this (I like the looks of <a href="https://github.com/schollz/croc">croc</a>, but don&rsquo;t want to use a public relay server and I don&rsquo;t want to learn how to configure a private one right now).<br>
+I&rsquo;m going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull mode to transfer my data. This is also known as &ldquo;daemonized&rdquo; or &ldquo;remote-source&rdquo; rsync. I&rsquo;m also going to leverage <a href="https://linux.die.net/man/1/screen">screen</a> to be able to detach from the rsync session while leaving it running in the background.</p>
 <hr>
 <p>On the source machine, we need to create an rsync config in <code>/etc/rsyncd.conf</code></p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[data] # name your rsync server share
@@ -237,9 +246,9 @@ I'm going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull m
 </code></pre></div><p>and then start the rsync daemon with:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ rsync -D
 </code></pre></div><hr>
-<p>On the destination machine, I'm going to run rsync in a screen so I can detach from it without killing the transfer, and reattach to check the progress. I'll create a screen session name &ldquo;rsync&rdquo; with:</p>
+<p>On the destination machine, I&rsquo;m going to run rsync in a screen so I can detach from it without killing the transfer, and reattach to check the progress. I&rsquo;ll create a screen session name &ldquo;rsync&rdquo; with:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ screen -S rsync
-</code></pre></div><p>This drops me right in to the screen session. The screen incantations I'll be using from within screen to detach, create, and move around are:</p>
+</code></pre></div><p>This drops me right in to the screen session. The screen incantations I&rsquo;ll be using from within screen to detach, create, and move around are:</p>
 <table>
 <thead>
 <tr>
@@ -281,9 +290,9 @@ I'm going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull m
 </tr>
 </tbody>
 </table>
-<p>With the rsync daemon running on the recovered machine, serving &ldquo;data&rdquo;, we can run rsync on the destination machine in &ldquo;remote-source&rdquo; mode. I'm copying the files on to my ZFS pool:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ rsync -avhzP --inplace 192.168.0.10::data/a /tank/recovered/data/a
-</code></pre></div><p>Rsync should be logging the transfer status to stdout in the terminal, showing us how things are going. Note, rsync is serial (un-parallelized), so I created a next screen and ran <code>iftop</code> and <code>htop</code> just to see if it was saturating my network or CPU (it was neither), checked the same thing on the source machine (neither), and then started a second, parallel sync of another directory (<code>::data/b</code>) to take advantage of my gig LAN, fast disk, and multicore CPUs. Repeat as needed - aim to fully saturate the network - and parallize up to 1.5X the number of threads in the system before rsync will start getting CPU bound. I'm able to read data reasonably fast due my drive array being RAID10, but unstriped data reads slower and could bottleneck on disk I/O before saturating either network or CPU. If adding an <code>rsync</code> process doesn't increase either of CPU or network usage you've probably maxed out your disks.</p>
+<p>With the rsync daemon running on the recovered machine, serving &ldquo;data&rdquo;, we can run rsync on the destination machine in &ldquo;remote-source&rdquo; mode. I&rsquo;m copying the files on to my ZFS pool:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ rsync -avhzP --inplace 192.168.0.200::src/files /recovered/files
+</code></pre></div><p>Rsync should be logging the transfer status to stdout in the terminal, showing us how things are going. Note, rsync is serial (un-parallelized), so I created a next screen and ran <code>iftop</code> and <code>htop</code> just to see if it was saturating my network or CPU (it was neither), checked the same thing on the source machine (neither), and then started a second, parallel sync of another directory (<code>::media/movies</code>) to take advantage of my gig LAN, fast disk, and multicore CPUs. Repeat as needed - aim to fully saturate the network - and parallize up to 1.5X the number of threads in the system before rsync will start getting CPU bound. I&rsquo;m able to read data reasonably fast due my drive array being RAID10, but unstriped data reads slower and could bottleneck on disk I/O before saturating either network or CPU. If adding an <code>rsync</code> process doesn&rsquo;t increase either of CPU or network usage you&rsquo;ve probably maxed out your disks.</p>
 <hr>
 <h4 id="toc">Read the other articles in this series here:</h4>
 <ul>
@@ -328,7 +337,7 @@ I'm going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull m
         </div>
       
     
-    
+
 
     
       
@@ -336,7 +345,7 @@ I'm going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull m
 
       
     
-    
+
     </div>
 
       </div>
@@ -351,7 +360,7 @@ I'm going to use <a href="https://linux.die.net/man/1/rsync">rsync</a> in pull m
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 

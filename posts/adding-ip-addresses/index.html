@@ -6,8 +6,8 @@
     
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="description" content="Multiple static IP Addresses on Linux I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the address that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card&#39;s IP, and the other to the remaining IP&amp;hellip;but I didn&#39;t&amp;hellip;
-It turns out, in Linux it&#39;s possible for a network device to have multiple IP addresses!"/>
+<meta name="description" content="Multiple static IP Addresses on Linux I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the address that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card&amp;rsquo;s IP, and the other to the remaining IP&amp;hellip;but I didn&amp;rsquo;t&amp;hellip;
+It turns out, in Linux it&amp;rsquo;s possible for a network device to have multiple IP addresses!"/>
 <meta name="keywords" content="ip, linux, ifconfig, wireguard, dns"/>
 <meta name="robots" content="noodp"/>
 <link rel="canonical" href="https://blog.rbtr.dev/posts/adding-ip-addresses/" />
@@ -45,7 +45,7 @@ It turns out, in Linux it&#39;s possible for a network device to have multiple I
 
 
   </head>
-  <body class="themed dark-theme">
+  <body class="dark-theme">
     <div class="container">
       <header class="header">
   <span class="header__inner">
@@ -56,7 +56,7 @@ It turns out, in Linux it&#39;s possible for a network device to have multiple I
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 
@@ -120,14 +120,22 @@ It turns out, in Linux it&#39;s possible for a network device to have multiple I
 
       <div class="content">
         
+  
+  
+
   <div class="post">
-    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/adding-ip-addresses/">Adding Static IP Addresses</a></h2>
+    <h1 class="post-title"><a href="https://blog.rbtr.dev/posts/adding-ip-addresses/">Adding Static IP Addresses</a></h1>
     <div class="post-meta">
       
         <span class="post-date">
-            14 Jan 2020
+          14 Jan 2020
         </span>
+
+        
+          
+        
       
+
       
       
         <span class="post-read-time">— 2 min read</span>
@@ -147,10 +155,11 @@ It turns out, in Linux it&#39;s possible for a network device to have multiple I
     
 
     <div class="post-content">
+      
       <hr>
 <h2 id="multiple-static-ip-addresses-on-linux">Multiple static IP Addresses on Linux</h2>
-<p>I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the <em>address</em> that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card's IP, and the other to the remaining IP&hellip;but I didn't&hellip;</p>
-<p>It turns out, in Linux it's possible for a network device to have multiple IP addresses! I can assign several IPs and then bind them independently.</p>
+<p>I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the <em>address</em> that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card&rsquo;s IP, and the other to the remaining IP&hellip;but I didn&rsquo;t&hellip;</p>
+<p>It turns out, in Linux it&rsquo;s possible for a network device to have multiple IP addresses! I can assign several IPs and then bind them independently.</p>
 <h3 id="temporarily-adding-an-ip-address-to-a-device">Temporarily adding an IP address to a device</h3>
 <p>Initially to test this out we can just add an IP address to a device. This will not persist through a reboot but it is sufficient to prove that our apps will run one-per-IP.</p>
 <p>First, check the available network devices with <code>ifconfig</code> or <code>ip</code>:</p>
@@ -162,25 +171,25 @@ wlp59s0: ...
 ...
 2: wlp59s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">1500</span> qdisc noqueue 
 ...
-</code></pre></div><p>I'm going to add an IP address to <code>wlp59s0</code>. It already has an IP, as we can see in the output of <code>ip addr</code>:</p>
+</code></pre></div><p>I&rsquo;m going to add an IP address to <code>wlp59s0</code>. It already has an IP, as we can see in the output of <code>ip addr</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ ip addr show dev wlp59s0
 2: wlp59s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">1500</span> qdisc noqueue state UP group default qlen <span style="color:#ae81ff">1000</span>
     link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
     inet 192.168.0.14/24 brd 192.168.0.255 scope global dynamic 
 </code></pre></div><p>This device has been assigned <code>192.168.0.14</code> by the router. I want it to also have <code>192.168.0.15</code>.</p>
 <blockquote>
-<p>Note: you might want to check the client leases in your router, or at least run <code>$ arp -a</code> to see what else is active in your subnet, so that you don't pick an IP that is already assigned to another device.</p>
+<p>Note: you might want to check the client leases in your router, or at least run <code>$ arp -a</code> to see what else is active in your subnet, so that you don&rsquo;t pick an IP that is already assigned to another device.</p>
 </blockquote>
 <p>To add the IP address, we can use the <code>ip</code> command again:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo ip address add dev wlp59s0 192.168.0.15/24
-</code></pre></div><p>That's it!</p>
+</code></pre></div><p>That&rsquo;s it!</p>
 <h3 id="permanently-assigning-ips-to-a-device">Permanently assigning IPs to a device</h3>
 <p>To make our testing changes permanent we can assign static IP addresses via <code>systemd-networkd</code>.</p>
 <p>In Fedora, networkd is configured via drop-ins in <code>/etc/sysconfig/network-scripts/</code>. I will editing the drop-in named <code>ifcfg-wlp59s0</code> - if a static IP address was already configured on this interface then the file may already exist - otherwise it should be created with this content:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text"># /etc/sysconfig/network-scripts/ifcfg-wlp59s0
 IPADDR0=&#34;192.168.0.14&#34;
 IPADDR1=&#34;192.168.0.15&#34;
-</code></pre></div><p>Now, we can reboot and check <code>$ ip addr</code> and we'll see that our device has both of the static addresses that we've configured! :)</p>
+</code></pre></div><p>Now, we can reboot and check <code>$ ip addr</code> and we&rsquo;ll see that our device has both of the static addresses that we&rsquo;ve configured! :)</p>
 
     </div>
     
@@ -211,7 +220,7 @@ IPADDR1=&#34;192.168.0.15&#34;
         </div>
       
     
-    
+
 
     
       
@@ -219,7 +228,7 @@ IPADDR1=&#34;192.168.0.15&#34;
 
       
     
-    
+
     </div>
 
       </div>
@@ -234,7 +243,7 @@ IPADDR1=&#34;192.168.0.15&#34;
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 

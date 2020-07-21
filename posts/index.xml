@@ -2,14 +2,37 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on rbtr.dev</title>
+    
+    
+    
     <link>https://blog.rbtr.dev/posts/</link>
     <description>Recent content in Posts on rbtr.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 17 Jan 2020 08:32:32 -0500</lastBuildDate>
+    <lastBuildDate>Tue, 21 Jul 2020 11:26:16 -0500</lastBuildDate>
     
 	<atom:link href="https://blog.rbtr.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Postfix IPv6</title>
+      <link>https://blog.rbtr.dev/posts/postfix-ipv6/</link>
+      <pubDate>Tue, 21 Jul 2020 11:26:16 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/posts/postfix-ipv6/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Fixing a postfix IPv6 error
+          
+        
+        </description>
+    </item>
     
     <item>
       <title>Automatic updates on Fedora</title>
@@ -17,8 +40,18 @@
       <pubDate>Fri, 17 Jan 2020 08:32:32 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/dnf-automatic/</guid>
-      <description>Update strategies Today I&#39;m setting up automatic updates on all of my Fedora machines.
-There are several school&#39;s of thought regarding keeping your systems up to date. In the cloud space recently the buzzword has been &amp;ldquo;immutable infrastructure&amp;rdquo; - the idea that your virtual-server&#39;s base operating system is fixed - effectively read-only - and you perform system updates by deploying new virtual machines and deleting the old ones. I can&#39;t throw my laptop away every time there&#39;s a new kernel version out, so this doesn&#39;t work for me!</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Keeping Fedora up to date with dnf-automatic
+          
+        
+        </description>
     </item>
     
     <item>
@@ -27,8 +60,18 @@ There are several school&#39;s of thought regarding keeping your systems up to d
       <pubDate>Tue, 14 Jan 2020 17:24:44 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/adding-ip-addresses/</guid>
-      <description>Multiple static IP Addresses on Linux I ran into some difficulty recently with two programs that wanted to bind to the same port. The ports were not configurable, but the address that they tried to bind to was. If I had had multiple network cards installed, I could have bound one app to one card&#39;s IP, and the other to the remaining IP&amp;hellip;but I didn&#39;t&amp;hellip;
-It turns out, in Linux it&#39;s possible for a network device to have multiple IP addresses!</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Setting multiple IPs on an interface in Linux
+          
+        
+        </description>
     </item>
     
     <item>
@@ -37,8 +80,18 @@ It turns out, in Linux it&#39;s possible for a network device to have multiple I
       <pubDate>Sat, 11 Jan 2020 15:32:04 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/coredns-localzone/</guid>
-      <description>This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-I previously wrote about setting up a PiHole and configured all my devices on the network to use it and get ads blocked at the DNS level. I also set up my WireGuard connected clients to be able to take advantage of that appliance even when I&#39;m traveling - as long as I can establish a secure WireGuard tunnel.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Building a private hosted zone with CoreDNS
+          
+        
+        </description>
     </item>
     
     <item>
@@ -47,9 +100,18 @@ I previously wrote about setting up a PiHole and configured all my devices on th
       <pubDate>Sat, 11 Jan 2020 12:13:00 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/pihole-wireguard/</guid>
-      <description>This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-I previously wrote about setting up a WireGuard VPN that allows me to connect to my LAN while offsite. Today I&#39;ll be setting up a PiHole and explaining how I can use this to block ads for any device on my network or connected to my VPN.
-Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGuard     Setting up the PiHole I&#39;m going to run my PiHole as a containerized process, using the official Docker image.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Running an ad-blocking PiHole DNS server in a container, and blocking ads for the entire LAN and VPN
+          
+        
+        </description>
     </item>
     
     <item>
@@ -58,9 +120,18 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
       <pubDate>Thu, 09 Jan 2020 17:40:00 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/wireguard/</guid>
-      <description>This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-In this post I&#39;m going to set up WireGuard, an exciting new in-kernel VPN technology from Jason Donenfield. It will be landing in the core Linux kernel very soon (probably in 5.6)!
-Setting up a VPN will let me access devices at any of my sites without having to expose all of those devices directly to the internet.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Building a personal VPN with WireGuard
+          
+        
+        </description>
     </item>
     
     <item>
@@ -69,8 +140,18 @@ Setting up a VPN will let me access devices at any of my sites without having to
       <pubDate>Thu, 09 Jan 2020 08:36:21 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/postfix-gmail/</guid>
-      <description>This is sub-part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-I previously wrote about setting up ZFS and, more importantly, ZED, the ZFS Event Daemon. ZED will notify me about ZFS events (like the completion of a daily scrub) via email - but we need to configure a relay so those emails make it off of my server and in to my inbox.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Using Postfix as a Gmail relay to send mail as you@gmail.com
+          
+        
+        </description>
     </item>
     
     <item>
@@ -79,9 +160,18 @@ I previously wrote about setting up ZFS and, more importantly, ZED, the ZFS Even
       <pubDate>Wed, 08 Jan 2020 21:05:00 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/zol-zed-postfix/</guid>
-      <description>This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-I have a few TB of data that&#39;s been living in a Btrfs array on an underpowered FX &amp;ldquo;server&amp;rdquo; that I want to move to a more robust ZFS array in the new Epyc server. This describes setting up ZFS on Linux, ZED, and Postfix+Mailx for regular filesystem status emails.
-Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS is an enterprise filesystem created by Sun for OpenSolaris more than 15 years ago.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Deploying and monitoring a ZFS pool with email status reports
+          
+        
+        </description>
     </item>
     
     <item>
@@ -90,10 +180,18 @@ Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS 
       <pubDate>Tue, 07 Jan 2020 11:09:22 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/recovering-fedora/</guid>
-      <description>This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-Today I&#39;ll be attempting to recover a machine that failed a Fedora version upgrade (v29-&amp;gt;v30) and now won&#39;t boot.
-Sections:  Troubleshooting Broken GRUB Booting a Live USB and chrooting Data transfer with rsync   Troubleshooting GRUB When we try to boot the machine, we&#39;re greeted with the following prompt:
-grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the config or the the files it needs to boot the OS (the initramfs).</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Salvaging a failed upgrade with chroot
+          
+        
+        </description>
     </item>
     
     <item>
@@ -102,8 +200,18 @@ grub&amp;gt; This usually indicates that GRUB is okay but it can&#39;t find the 
       <pubDate>Mon, 06 Jan 2020 11:09:22 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/new-year-new-lab/</guid>
-      <description>It was an extraordinarily busy and educational past year for me, working in the cloud computing space. In preparation for the &amp;lsquo;20s, I spent the (not-so-)quiet time off of work at the end of last year rebuilding several home networks, installing and configuring personal servers, and otherwise leveling-up my homelabs - redoing and improving things now that I know better. This multiparter is a log of that!
-Read the other articles in this series here:  New Year, New Lab #TODO - Epyc EKWB liquid cooled server build ZFS on Linux, ZED, and Postfix Configuring Postfix with Gmail WireGuard VPN mesh PiHole and DNS over WireGuard Private DNS with CoreDNS #TODO - VFIO GPU Passthrough #TODO - Networking: Unifi, VLANs, and (Core)DNS localzones over WireGuard Rescuing a bad Fedora upgrade via chroot  Where we started Note: when I say &amp;ldquo;site&amp;rdquo;, I mean &amp;ldquo;mine or a family member&#39;s home&amp;rdquo;.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Leveling up the homelab
+          
+        
+        </description>
     </item>
     
   </channel>

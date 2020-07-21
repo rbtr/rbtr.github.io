@@ -2,6 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>zed on rbtr.dev</title>
+    
+    
+    
     <link>https://blog.rbtr.dev/tags/zed/</link>
     <description>Recent content in zed on rbtr.dev</description>
     <generator>Hugo -- gohugo.io</generator>
@@ -17,8 +20,18 @@
       <pubDate>Thu, 09 Jan 2020 08:36:21 -0500</pubDate>
       
       <guid>https://blog.rbtr.dev/posts/postfix-gmail/</guid>
-      <description>This is sub-part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-I previously wrote about setting up ZFS and, more importantly, ZED, the ZFS Event Daemon. ZED will notify me about ZFS events (like the completion of a daily scrub) via email - but we need to configure a relay so those emails make it off of my server and in to my inbox.</description>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Using Postfix as a Gmail relay to send mail as you@gmail.com
+          
+        
+        </description>
     </item>
     
   </channel>

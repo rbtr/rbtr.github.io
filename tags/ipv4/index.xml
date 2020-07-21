@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ipv4 on rbtr.dev</title>
+    
+    
+    
+    <link>https://blog.rbtr.dev/tags/ipv4/</link>
+    <description>Recent content in ipv4 on rbtr.dev</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 21 Jul 2020 11:26:16 -0500</lastBuildDate>
+    
+	<atom:link href="https://blog.rbtr.dev/tags/ipv4/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Postfix IPv6</title>
+      <link>https://blog.rbtr.dev/posts/postfix-ipv6/</link>
+      <pubDate>Tue, 21 Jul 2020 11:26:16 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/posts/postfix-ipv6/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          Fixing a postfix IPv6 error
+          
+        
+        </description>
+    </item>
+    
+  </channel>
+</rss>

@@ -6,8 +6,8 @@
     
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-I have a few TB of data that&#39;s been living in a Btrfs array on an underpowered FX &amp;ldquo;server&amp;rdquo; that I want to move to a more robust ZFS array in the new Epyc server. This describes setting up ZFS on Linux, ZED, and Postfix&#43;Mailx for regular filesystem status emails.
+<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;rsquo;20s.
+I have a few TB of data that&amp;rsquo;s been living in a Btrfs array on an underpowered FX &amp;ldquo;server&amp;rdquo; that I want to move to a more robust ZFS array in the new Epyc server. This describes setting up ZFS on Linux, ZED, and Postfix&#43;Mailx for regular filesystem status emails.
 Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS is an enterprise filesystem created by Sun for OpenSolaris more than 15 years ago."/>
 <meta name="keywords" content="blog,rbtr,aws,cloud,kubernetes,epyc,amd,vfio,iommu,fedora,linux,boot,grub"/>
 <meta name="robots" content="noodp"/>
@@ -46,7 +46,7 @@ Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS 
 
 
   </head>
-  <body class="themed dark-theme">
+  <body class="dark-theme">
     <div class="container">
       <header class="header">
   <span class="header__inner">
@@ -57,7 +57,7 @@ Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS 
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 
@@ -121,14 +121,22 @@ Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS 
 
       <div class="content">
         
+  
+  
+
   <div class="post">
-    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/zol-zed-postfix/">ZFS on Linux, ZED, and Postfix</a></h2>
+    <h1 class="post-title"><a href="https://blog.rbtr.dev/posts/zol-zed-postfix/">ZFS on Linux, ZED, and Postfix</a></h1>
     <div class="post-meta">
       
         <span class="post-date">
-            8 Jan 2020
+          8 Jan 2020
         </span>
+
+        
+          
+        
       
+
       
       
         <span class="post-read-time">— 7 min read</span>
@@ -150,9 +158,10 @@ Sections:  ZFS background ZFS-on-Linux Daily scrubs and email reports   ZFS ZFS 
     
 
     <div class="post-content">
+      
       <hr>
-<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &lsquo;20s.</p>
-<p>I have a few TB of data that's been living in a Btrfs array on an underpowered FX &ldquo;server&rdquo; that I want to move to a more robust ZFS array in the new <a href="#TODO-ref-epyc">Epyc server</a>. This describes setting up ZFS on Linux, ZED, and Postfix+Mailx for regular filesystem status emails.</p>
+<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &rsquo;20s.</p>
+<p>I have a few TB of data that&rsquo;s been living in a Btrfs array on an underpowered FX &ldquo;server&rdquo; that I want to move to a more robust ZFS array in the new <a href="#TODO-ref-epyc">Epyc server</a>. This describes setting up ZFS on Linux, ZED, and Postfix+Mailx for regular filesystem status emails.</p>
 <h4 id="sections">Sections:</h4>
 <ul>
 <li><a href="#zfs">ZFS background</a></li>
@@ -202,7 +211,7 @@ My primary reasons for choosing it (and for moving away from Btrfs) is its integ
 </table>
 <p>I recommend playing with the RAIDZ calculator <a href="https://wintelguy.com/zfs-calc.pl/?raidtype=RZ3&amp;ndg=5&amp;ng=2&amp;zmd_chkbx=ZMD">here</a> to get an idea of what the different RAIDZ levels do to the available storage in the pool and in exchange for disk failure tolerance.</p>
 <p>In addition to tolerating whole disk <strong>failures</strong> up to the specified RAIDZ level, ZFS is also capable of silently and transparently detecting <em>and repairing</em> bit-rot and filesystem corruption that may occur during the lifetime of the array. This means that our ZFS pool will never suddenly present file corruption: ZFS will detect that the file is corrupted, correct the corruption using the redundant parity data, and serve us the corrected data while writing it back to the corrupted location.</p>
-<p>This <strong>self healing</strong> capability of ZFS is only possible in RAIDZ. To take full advantage of it, we'll also want to run <code>zfs scrub</code> on a regular basis - daily or weekly if possible - to let ZFS checksum the entire disk and fix parity errors. And to make it almost completely bulletproof, we'll also want <a href="#TODO-ref-epyc">ECC RAM</a> that will prevent memory corruption that could affect our filesystem integrity.</p>
+<p>This <strong>self healing</strong> capability of ZFS is only possible in RAIDZ. To take full advantage of it, we&rsquo;ll also want to run <code>zfs scrub</code> on a regular basis - daily or weekly if possible - to let ZFS checksum the entire disk and fix parity errors. And to make it almost completely bulletproof, we&rsquo;ll also want <a href="#TODO-ref-epyc">ECC RAM</a> that will prevent memory corruption that could affect our filesystem integrity.</p>
 <p>Let me stop to answer the question you should be asking:</p>
 <blockquote>
 <p>Do I <em>need</em> ECC (or RAIDZ, or even ZFS)?</p>
@@ -211,33 +220,33 @@ My primary reasons for choosing it (and for moving away from Btrfs) is its integ
 <p>No, not really.</p>
 </blockquote>
 <p>The statistical likelihood of a bitflip in memory corrupting a file being written is tiny.</p>
-<p>And the odds of a hard drive failing catastrophically decrease with every new drive released as manufacturers like Seagate and WD get better and better at building them. The drives that I have installed are warrantied for 5 years! But as the capacity of the drives increases (I've installed 10TB units), the impact that that single drive failure would have also increases. I want protect my data from at least 1 drive failure and preferably more.</p>
-<p>But I don't even really need ZFS for that. Btrfs has decent software RAID1 and 10 (but <a href="https://btrfs.wiki.kernel.org/index.php/RAID56">don't use 5/6!</a>), and Linux's MD softraid could do it too. Or a hardware RAID card, or etc, etc&hellip;</p>
-<p>But, all together, ECC and ZFS make it very, very unlikely that I will lose data on this system. (Lose <em>some</em> data. It's still vulnerable to a total system failure event - see <a href="https://www.backblaze.com/blog/the-3-2-1-backup-strategy/">3-2-1 strategy</a>)</p>
+<p>And the odds of a hard drive failing catastrophically decrease with every new drive released as manufacturers like Seagate and WD get better and better at building them. The drives that I have installed are warrantied for 5 years! But as the capacity of the drives increases (I&rsquo;ve installed 10TB units), the impact that that single drive failure would have also increases. I want protect my data from at least 1 drive failure and preferably more.</p>
+<p>But I don&rsquo;t even really need ZFS for that. Btrfs has decent software RAID1 and 10 (but <a href="https://btrfs.wiki.kernel.org/index.php/RAID56">don&rsquo;t use 5/6!</a>), and Linux&rsquo;s MD softraid could do it too. Or a hardware RAID card, or etc, etc&hellip;</p>
+<p>But, all together, ECC and ZFS make it very, very unlikely that I will lose data on this system. (Lose <em>some</em> data. It&rsquo;s still vulnerable to a total system failure event - see <a href="https://www.backblaze.com/blog/the-3-2-1-backup-strategy/">3-2-1 strategy</a>)</p>
 <h4 id="compression">Compression</h4>
 <p>ZFS supports <a href="https://pthree.org/2012/12/18/zfs-administration-part-xi-compression-and-deduplication/">native compression</a>, meaning that the data will be compressed on disk but appear uncompressed when accessed - ZFS handles the compression without you the user needing to <code>unzip</code> or <code>tar -xvf</code> anything, and it applies to the entire filesystem with practically no performance penalty.</p>
 <p>ZFS also supports <a href="https://blogs.oracle.com/bonwick/zfs-deduplication-v2">deduplication</a>, where blocks or byte patterns that are already present on the disk can be reused instead of written again across the entire filesystem, but this has performance and resource usage implications:</p>
 <ul>
 <li>It eats RAM like a monster - the deduplication table needs about 5GB per 1TB of data stored.</li>
-<li>But because the dedupe table can't be more than 1/4 of the ARC (which is also in-memory), we need 4 times that much memory to be able to hold the entire ARC and dedupe table in RAM. Make that 20GB/TB of storage.</li>
-<li>And there's write delays - data coming in has to be deduped before it's written to disk.</li>
+<li>But because the dedupe table can&rsquo;t be more than 1/4 of the ARC (which is also in-memory), we need 4 times that much memory to be able to hold the entire ARC and dedupe table in RAM. Make that 20GB/TB of storage.</li>
+<li>And there&rsquo;s write delays - data coming in has to be deduped before it&rsquo;s written to disk.</li>
 </ul>
-<p>Deduping can save as much as 50% capacity - writing 10TB of data to 5TB of disk - but I'm going to leave it turned off.</p>
+<p>Deduping can save as much as 50% capacity - writing 10TB of data to 5TB of disk - but I&rsquo;m going to leave it turned off.</p>
 <h2 id="zol">Installing ZFS on Linux</h2>
 <p>Installing ZoL on Fedora is the easiest part of getting ZFS up:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo dnf install http://download.zfsonlinux.org/fedora/zfs-release<span style="color:#66d9ef">$(</span>rpm -E %dist<span style="color:#66d9ef">)</span>.noarch.rpm
 $ sudo dnf install zfs kernel-devel
 </code></pre></div><p>It may be necessary to reboot if the kernel-devel version does not match the running kernel. <a href="https://github.com/zfsonlinux/zfs/wiki/Fedora">This page</a> on the Fedora wiki should be referenced for any issues.</p>
-<p>With ZFS installed, we can create our zpool. I'm going to create a 6 disk RAIDZ2 pool:</p>
+<p>With ZFS installed, we can create our zpool. I&rsquo;m going to create a 6 disk RAIDZ2 pool:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo zpool create tank raidz2 sda sdb sdc sde sdd sdf
-</code></pre></div><p>And I'll create a dataset and check the mounts (note that <code>/tank</code> is already mounted and ready to use!):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo zfs create tank/data
+</code></pre></div><p>And I&rsquo;ll create a dataset and check the mounts (note that <code>/tank</code> is already mounted and ready to use!):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo zfs create tank/media
 $ sudo zfs list
 tank        0.0T  X.XT     0K  /tank
-tank/data  0.0T  X.XT     0T  /tank/data
+tank/media  0.0T  X.XT     0T  /tank/media
 </code></pre></div><p><a href="https://pthree.org/2012/12/04/zfs-administration-part-i-vdevs/">This ZFS documentation</a> from Aaron Toponce is fantastic for building a quick understanding of vdevs, RAIDZ, zpools, and zvols.</p>
 <h2 id="scrubs">Automating daily scrubs</h2>
-<p>To take full advantage of ZFS's self-healing capabilities, we should run regular scrubs. We can automate this with <code>systemd</code>.</p>
+<p>To take full advantage of ZFS&rsquo;s self-healing capabilities, we should run regular scrubs. We can automate this with <code>systemd</code>.</p>
 <p>I created a systemd unit called <code>zfs-scrub@.service</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo vi /etc/systemd/system/zfs-scrub@.service
 <span style="color:#f92672">[</span>Unit<span style="color:#f92672">]</span>                                                                                                                             
@@ -265,18 +274,18 @@ WantedBy<span style="color:#f92672">=</span>multi-user.target
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl enable --now zfs-scrub@tank.timer
 </code></pre></div><p>Now, the tank will automatically be scrubbed every day at midnight!</p>
 <h3 id="zed">ZED</h3>
-<p>I don't want to have to log in to my server every morning to check the status of last night's zpool scrub. Wouldn't it be nice if I could just be notified of the results?</p>
+<p>I don&rsquo;t want to have to log in to my server every morning to check the status of last night&rsquo;s zpool scrub. Wouldn&rsquo;t it be nice if I could just be notified of the results?</p>
 <p>ZED is the <a href="http://manpages.ubuntu.com/manpages/xenial/man8/zed.8.html">ZFS Event Daemon</a>. It watches for ZFS events (like a scrub completing) and reacts to those events (by, for example, sending an email). It comes with ZFS and can be enabled like:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl enable --now zfs-zed.service
-</code></pre></div><p>However, the default configuration probably doesn't know how to send emails correctly. I'm going to set ZED up to post mails to a local mail relay (postfix, via mailx), so I need to adjust the ZED config to send to my email, using <code>mail</code>:</p>
+</code></pre></div><p>However, the default configuration probably doesn&rsquo;t know how to send emails correctly. I&rsquo;m going to set ZED up to post mails to a local mail relay (postfix, via mailx), so I need to adjust the ZED config to send to my email, using <code>mail</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo vi /etc/zfs/zed.d/zed.rc
 ...
-ZED_EMAIL_ADDR<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;your@email.com&#34;</span>
+ZED_EMAIL_ADDR<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;youremail@gmail.com&#34;</span>
 ZED_EMAIL_PROG<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;mail&#34;</span>
 ...
 $ sudo systemctl restart zfs-zed.service
 </code></pre></div><h3 id="postfix-mailx-and-gmail">Postfix, Mailx and Gmail:</h3>
-<p>I tested several combinations of mail relays, mail servers, and cli wrappers, and Postfix+Mailx is the combo that I landed on that works best with ZED. Other <code>sendmail</code> compatible programs <em>may</em> work, but I couldn't figure out how to make them play together.</p>
+<p>I tested several combinations of mail relays, mail servers, and cli wrappers, and Postfix+Mailx is the combo that I landed on that works best with ZED. Other <code>sendmail</code> compatible programs <em>may</em> work, but I couldn&rsquo;t figure out how to make them play together.</p>
 <p>Install Postfix and Mailx:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo dnf install -y postfix mailx
 </code></pre></div><p>Setting up Postfix, Mailx and ZED is <a href="../postfix-gmail">continued in &ldquo;Configuring Postfix with Gmail&rdquo;.</a></p>
@@ -324,7 +333,7 @@ $ sudo systemctl restart zfs-zed.service
         </div>
       
     
-    
+
 
     
       
@@ -332,7 +341,7 @@ $ sudo systemctl restart zfs-zed.service
 
       
     
-    
+
     </div>
 
       </div>
@@ -347,7 +356,7 @@ $ sudo systemctl restart zfs-zed.service
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 

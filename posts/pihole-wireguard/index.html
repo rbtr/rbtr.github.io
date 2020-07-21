@@ -6,9 +6,9 @@
     
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-I previously wrote about setting up a WireGuard VPN that allows me to connect to my LAN while offsite. Today I&#39;ll be setting up a PiHole and explaining how I can use this to block ads for any device on my network or connected to my VPN.
-Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGuard     Setting up the PiHole I&#39;m going to run my PiHole as a containerized process, using the official Docker image."/>
+<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;rsquo;20s.
+I previously wrote about setting up a WireGuard VPN that allows me to connect to my LAN while offsite. Today I&amp;rsquo;ll be setting up a PiHole and explaining how I can use this to block ads for any device on my network or connected to my VPN.
+Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGuard     Setting up the PiHole I&amp;rsquo;m going to run my PiHole as a containerized process, using the official Docker image."/>
 <meta name="keywords" content="pihole, coredns, dns, wireguard, ad, ads, blocking, ad-block, resolved, systemd-resolved, systemd, dnsmasq"/>
 <meta name="robots" content="noodp"/>
 <link rel="canonical" href="https://blog.rbtr.dev/posts/pihole-wireguard/" />
@@ -46,7 +46,7 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
 
 
   </head>
-  <body class="themed dark-theme">
+  <body class="dark-theme">
     <div class="container">
       <header class="header">
   <span class="header__inner">
@@ -57,7 +57,7 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 
@@ -121,14 +121,22 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
 
       <div class="content">
         
+  
+  
+
   <div class="post">
-    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/pihole-wireguard/">PiHole and DNS over WireGuard</a></h2>
+    <h1 class="post-title"><a href="https://blog.rbtr.dev/posts/pihole-wireguard/">PiHole and DNS over WireGuard</a></h1>
     <div class="post-meta">
       
         <span class="post-date">
-            11 Jan 2020
+          11 Jan 2020
         </span>
+
+        
+          
+        
       
+
       
       
         <span class="post-read-time">— 6 min read</span>
@@ -148,9 +156,10 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
     
 
     <div class="post-content">
+      
       <hr>
-<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &lsquo;20s.</p>
-<p>I previously wrote about <a href="../wireguard">setting up a WireGuard VPN</a> that allows me to connect to my LAN while offsite. Today I'll be setting up a <a href="https://pi-hole.net">PiHole</a> and explaining how I can use this to block ads for any device on my network or connected to my VPN.</p>
+<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &rsquo;20s.</p>
+<p>I previously wrote about <a href="../wireguard">setting up a WireGuard VPN</a> that allows me to connect to my LAN while offsite. Today I&rsquo;ll be setting up a <a href="https://pi-hole.net">PiHole</a> and explaining how I can use this to block ads for any device on my network or connected to my VPN.</p>
 <h4 id="sections">Sections:</h4>
 <ul>
 <li><a href="#pihole">Containerized PiHole</a></li>
@@ -163,8 +172,8 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
 </ul>
 <hr>
 <h2 id="pihole">Setting up the PiHole</h2>
-<p>I'm going to run my PiHole as a containerized process, using the <a href="https://github.com/pi-hole/docker-pi-hole">official Docker image</a>. But, I'm running Fedora 31 - which uses cgroups v2 (that Docker doesn't support) - so I'll be using Podman. You can read more about that <a href="../cgroupsv2-f31">in my (upcoming) post on F31, cgroups v2, and Kubernetes</a>.</p>
-<p>The pattern I'll be using is the <a href="https://podman.io/blogs/2018/09/13/systemd.html">officially recommended container lifecycle</a> for Podman workflows:</p>
+<p>I&rsquo;m going to run my PiHole as a containerized process, using the <a href="https://github.com/pi-hole/docker-pi-hole">official Docker image</a>. But, I&rsquo;m running Fedora 31 - which uses cgroups v2 (that Docker doesn&rsquo;t support) - so I&rsquo;ll be using Podman. You can read more about that <a href="../cgroupsv2-f31">in my (upcoming) post on F31, cgroups v2, and Kubernetes</a>.</p>
+<p>The pattern I&rsquo;ll be using is the <a href="https://podman.io/blogs/2018/09/13/systemd.html">officially recommended container lifecycle</a> for Podman workflows:</p>
 <ol>
 <li>create the container with <code>podman</code></li>
 <li>manage the runtime with <code>systemd</code></li>
@@ -202,7 +211,7 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
 </span><span style="color:#ae81ff"></span>        -v /etc/pihole/dnsmasq.d:/etc/dnsmasq.d:z <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>        pihole/pihole:latest
 </code></pre></div><p>As we can see, the <code>podman</code> syntax is mostly equivalent to the <code>docker</code> CLI syntax. In fact, we could <code>alias docker=podman</code> and use it just like we use Docker, most of the time ;)</p>
-<p>Notice we are not <em>running</em> the PiHole yet, we've just created the container. To start it (and manage it for the future), we use systemd.</p>
+<p>Notice we are not <em>running</em> the PiHole yet, we&rsquo;ve just created the container. To start it (and manage it for the future), we use systemd.</p>
 <p>I wrote this straightforward systemd unit to run the container:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text"># /etc/systemd/system/pihole.service
 [Unit]
@@ -220,12 +229,12 @@ WantedBy=multi-user.target
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl enable --now pihole
 </code></pre></div><p>Using <code>enable</code> instead of just <code>start</code> means the service will be started automatically at boot, so I never have to think about it again.</p>
 <blockquote>
-<p><strong>Note: one drawback that I have noticed with running PiHole with Podman is that all of the incoming requests have their source IP rewritten to the Podman NAT source <code>10.88.0.1</code>. I have tried to turn of NATing with no luck. Further, PiHole <em>will not run</em> with <code>--net=host</code> on my machine because I have left &ldquo;predictable interface names&rdquo; enabled and it is <em>hardcoded</em> to expect <code>eth0</code> - my primary interface is <code>eno1</code>. This does not affect usability and is only cosmetic (PiHole's metrics show al requests come from <code>10.88.0.1</code> instead of my real clients) so I left it alone.</strong></p>
+<p><strong>Note: one drawback that I have noticed with running PiHole with Podman is that all of the incoming requests have their source IP rewritten to the Podman NAT source <code>10.88.0.1</code>. I have tried to turn of NATing with no luck. Further, PiHole <em>will not run</em> with <code>--net=host</code> on my machine because I have left &ldquo;predictable interface names&rdquo; enabled and it is <em>hardcoded</em> to expect <code>eth0</code> - my primary interface is <code>eno1</code>. This does not affect usability and is only cosmetic (PiHole&rsquo;s metrics show al requests come from <code>10.88.0.1</code> instead of my real clients) so I left it alone.</strong></p>
 </blockquote>
-<p>Finally, let's check that the PiHole is running and blocking ad-related domains as expected:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ dig doubleclick.net @192.168.0.9
+<p>Finally, let&rsquo;s check that the PiHole is running and blocking ad-related domains as expected:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ dig doubleclick.net @192.168.0.53
 
-; &lt;&lt;&gt;&gt; DiG 9.11.13-RedHat-9.11.13-3.fc31 &lt;&lt;&gt;&gt; doubleclick.net @192.168.0.9
+; &lt;&lt;&gt;&gt; DiG 9.11.13-RedHat-9.11.13-3.fc31 &lt;&lt;&gt;&gt; doubleclick.net @192.168.0.53
 ;; global options: +cmd
 ;; Got answer:
 ;; -&gt;&gt;HEADER<span style="color:#e6db74">&lt;&lt;- opco</span>de: QUERY, status: NOERROR, id: <span style="color:#ae81ff">7561</span>
@@ -240,18 +249,18 @@ WantedBy=multi-user.target
 doubleclick.net.        <span style="color:#ae81ff">2</span>       IN      A       0.0.0.0
 
 ;; Query time: <span style="color:#ae81ff">0</span> msec
-;; SERVER: 192.168.0.9#53<span style="color:#f92672">(</span>192.168.0.9<span style="color:#f92672">)</span>
+;; SERVER: 192.168.0.53#53<span style="color:#f92672">(</span>192.168.0.53<span style="color:#f92672">)</span>
 ;; WHEN: Sat Jan <span style="color:#ae81ff">11</span> 13:52:45 CST <span style="color:#ae81ff">2020</span>
 ;; MSG SIZE  rcvd: <span style="color:#ae81ff">60</span>
 </code></pre></div><p>Note in the <code>ANSWER SECTION</code> that the name resolved to <code>0.0.0.0</code>. That means everything is working!</p>
 <h2 id="pihole-dns">Using the PiHole for DNS</h2>
-<p>Now that we're running an ad-blocking DNS server, we need to configure our other devices to use it and enjoy the ad-free Internet.</p>
-<p>We can easily make it so that any device on the LAN uses the PiHole, and also enable it on all of the devices on our <a href="../wireguard">WireGuard mesh</a>. I'll start with applying it to my LAN.</p>
+<p>Now that we&rsquo;re running an ad-blocking DNS server, we need to configure our other devices to use it and enjoy the ad-free Internet.</p>
+<p>We can easily make it so that any device on the LAN uses the PiHole, and also enable it on all of the devices on our <a href="../wireguard">WireGuard mesh</a>. I&rsquo;ll start with applying it to my LAN.</p>
 <h3 id="pihole-dns-lan">Configuring the Gateway/Router</h3>
 <p>To route DNS traffic through the PiHole for all devices on the same network as it, we set the LAN DHCP server to use the PiHole as its DNS server. Unless you have configured it otherwise, the LAN DHCP server is usually the Gateway or Router provided by your ISP, or that is attached to the pipe from your ISP and exposed to the Internet.</p>
 <p>The DHCP server is responsible for a things like assigning IP addresses to all the clients on your LAN. It also tells those clients what DNS servers they should use.</p>
-<p>My Gateway has a couple of options for configuring the DNS server settings. By default, it's set to &ldquo;ISP&rdquo;, meaning when my router just passes along the DNS server IPs from my ISP to its DHCP clients. I changed this to &ldquo;Static&rdquo;, and then put in my PiHole's IP address as the primary DNS server.</p>
-<p>In case the PiHole service crashes, I set a backup DNS IP to <code>1.1.1.1</code>, Cloudflare's public DNS server, so that the devices on my network won't experience any interruptions to their network access.</p>
+<p>My Gateway has a couple of options for configuring the DNS server settings. By default, it&rsquo;s set to &ldquo;ISP&rdquo;, meaning when my router just passes along the DNS server IPs from my ISP to its DHCP clients. I changed this to &ldquo;Static&rdquo;, and then put in my PiHole&rsquo;s IP address as the primary DNS server.</p>
+<p>In case the PiHole service crashes, I set a backup DNS IP to <code>1.1.1.1</code>, Cloudflare&rsquo;s public DNS server, so that the devices on my network won&rsquo;t experience any interruptions to their network access.</p>
 <p>Then, I told the gateway to renew all the client DHCP leases so that all my clients immediately picked up the new DNS settings. If your router does not have a function for that, you can disconnect and reconnect a device to the network to force it to get a new lease, or you can wait until the DHCP leases expire and are automatically renewed. This usually happens within 24 hours.</p>
 <p>Once the clients have renewed their DHCP, they get the new DNS config pointed at the PiHole and start sending their DNS requests to it.</p>
 <h3 id="pihole-dns-wireguard">Configuring off-network WireGuard clients</h3>
@@ -260,7 +269,7 @@ doubleclick.net.        <span style="color:#ae81ff">2</span>       IN      A    
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Interface]
 # Name = wg0
 ...
-DNS = 192.168.0.9 # &lt;- this is the LAN IP address of my PiHole
+DNS = 192.168.0.53 # &lt;- this is the LAN IP address of my PiHole
 
 [Peer] 
 # this is a Peer on my PiHole&#39;s LAN - not necessarily the same machine
@@ -268,7 +277,7 @@ DNS = 192.168.0.9 # &lt;- this is the LAN IP address of my PiHole
 ...
 AllowedIPs = 172.16.4.1, 192.168.0.0/24 # &lt;- this is my LAN CIDR
 </code></pre></div><p>After this change whenever I connect my WireGuard VPN this peer will send its DNS requests through my PiHole.</p>
-<p>To set it up on my phone I make the same changes: adding the PiHole IP address to the <code>DNS</code> field of the WireGuard config, and making sure that routing Peer has the LAN CIDR in it's <code>AllowedIPs</code>.</p>
+<p>To set it up on my phone I make the same changes: adding the PiHole IP address to the <code>DNS</code> field of the WireGuard config, and making sure that routing Peer has the LAN CIDR in it&rsquo;s <code>AllowedIPs</code>.</p>
 <p>Now all of my devices are forever ad-free, at home or on the go!</p>
 <hr>
 <h4 id="toc">Read the other articles in this series here:</h4>
@@ -314,7 +323,7 @@ AllowedIPs = 172.16.4.1, 192.168.0.0/24 # &lt;- this is my LAN CIDR
         </div>
       
     
-    
+
 
     
       
@@ -322,7 +331,7 @@ AllowedIPs = 172.16.4.1, 192.168.0.0/24 # &lt;- this is my LAN CIDR
 
       
     
-    
+
     </div>
 
       </div>
@@ -337,7 +346,7 @@ AllowedIPs = 172.16.4.1, 192.168.0.0/24 # &lt;- this is my LAN CIDR
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 

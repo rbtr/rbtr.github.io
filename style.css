@@ -1,0 +1,11 @@
+:root {
+  --cursor-color: #fe5186;
+}
+
+body.dark-theme {
+  --cursor-color: #01ae79;
+}
+
+.logo__cursor {
+  background: var(--cursor-color);
+}

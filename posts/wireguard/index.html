@@ -6,8 +6,8 @@
     
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;lsquo;20s.
-In this post I&#39;m going to set up WireGuard, an exciting new in-kernel VPN technology from Jason Donenfield. It will be landing in the core Linux kernel very soon (probably in 5.6)!
+<meta name="description" content="This is part of my series on renovating my homelabs to ring in the roaring &amp;rsquo;20s.
+In this post I&amp;rsquo;m going to set up WireGuard, an exciting new in-kernel VPN technology from Jason Donenfield. It will be landing in the core Linux kernel very soon (probably in 5.6)!
 Setting up a VPN will let me access devices at any of my sites without having to expose all of those devices directly to the internet."/>
 <meta name="keywords" content="blog,rbtr,aws,cloud,kubernetes,epyc,amd,vfio,iommu,fedora,linux,boot,grub"/>
 <meta name="robots" content="noodp"/>
@@ -29,12 +29,12 @@ Setting up a VPN will let me access devices at any of my sites without having to
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="WireGuard mesh"/>
-<meta name="twitter:description" content="Building a personal site-to-site VPN with WireGuard"/>
+<meta name="twitter:description" content="Building a personal VPN with WireGuard"/>
 
 
 
 <meta property="og:title" content="WireGuard mesh" />
-<meta property="og:description" content="Building a personal site-to-site VPN with WireGuard" />
+<meta property="og:description" content="Building a personal VPN with WireGuard" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://blog.rbtr.dev/posts/wireguard/" />
 <meta property="article:published_time" content="2020-01-09T17:40:00-05:00" />
@@ -46,7 +46,7 @@ Setting up a VPN will let me access devices at any of my sites without having to
 
 
   </head>
-  <body class="themed dark-theme">
+  <body class="dark-theme">
     <div class="container">
       <header class="header">
   <span class="header__inner">
@@ -57,7 +57,7 @@ Setting up a VPN will let me access devices at any of my sites without having to
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 
@@ -121,14 +121,22 @@ Setting up a VPN will let me access devices at any of my sites without having to
 
       <div class="content">
         
+  
+  
+
   <div class="post">
-    <h2 class="post-title"><a href="https://blog.rbtr.dev/posts/wireguard/">WireGuard mesh</a></h2>
+    <h1 class="post-title"><a href="https://blog.rbtr.dev/posts/wireguard/">WireGuard mesh</a></h1>
     <div class="post-meta">
       
         <span class="post-date">
-            9 Jan 2020
+          9 Jan 2020
         </span>
+
+        
+          
+        
       
+
       
       
         <span class="post-read-time">— 9 min read</span>
@@ -148,10 +156,11 @@ Setting up a VPN will let me access devices at any of my sites without having to
     
 
     <div class="post-content">
+      
       <hr>
-<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &lsquo;20s.</p>
-<p>In this post I'm going to set up <a href="https://www.wireguard.com/">WireGuard</a>, an exciting new in-kernel VPN technology from Jason Donenfield. It will be landing in the core <a href="https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net-next.git/commit/?id=e7096c131e5161fa3b8e52a650d7719d2857adfd">Linux kernel very soon (probably in 5.6)</a>!</p>
-<p>Setting up a VPN will let me access devices at any of my sites without having to expose all of those devices directly to the internet. WireGuard has some great features that make it my choice over incumbent VPN's like OpenVPN or IPSec&hellip;and the set up is quick and painless.</p>
+<p>This is part of my series on <a href="../new-year-new-lab">renovating my homelabs</a> to ring in the roaring &rsquo;20s.</p>
+<p>In this post I&rsquo;m going to set up <a href="https://www.wireguard.com/">WireGuard</a>, an exciting new in-kernel VPN technology from Jason Donenfield. It will be landing in the core <a href="https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net-next.git/commit/?id=e7096c131e5161fa3b8e52a650d7719d2857adfd">Linux kernel very soon (probably in 5.6)</a>!</p>
+<p>Setting up a VPN will let me access devices at any of my sites without having to expose all of those devices directly to the internet. WireGuard has some great features that make it my choice over incumbent VPN&rsquo;s like OpenVPN or IPSec&hellip;and the set up is quick and painless.</p>
 <h4 id="sections">Sections:</h4>
 <ul>
 <li><a href="#broken-grub">Installing WireGuard</a></li>
@@ -160,9 +169,9 @@ Setting up a VPN will let me access devices at any of my sites without having to
 </ul>
 <hr>
 <h3 id="why-wireguard">Why WireGuard?</h3>
-<p>WireGuard is an awesome new technology and very appealing as a replacement for existing VPN solutions. Its biggest selling point simplicity, as you'll see below as we trivially build a VPN.</p>
+<p>WireGuard is an awesome new technology and very appealing as a replacement for existing VPN solutions. Its biggest selling point simplicity, as you&rsquo;ll see below as we trivially build a VPN.</p>
 <p>It is easy to configure and secure by default - there is no need to pick a crypto algorithm or create port triggering rules to protect your VPN from the open internet.</p>
-<p>It's based on proven public key encryption paradigms. Wireguard is implemented in &lt;5k lines of code - delegating to trusted crypto libraries instead of reimplementing them. Its simplicity allowed the team to patch the <a href="https://seclists.org/oss-sec/2019/q4/122">route based networking exploit from late 2019</a> before <a href="https://lists.zx2c4.com/pipermail/wireguard/2019-December/004679.html">the CVE was even public</a>.</p>
+<p>It&rsquo;s based on proven public key encryption paradigms. Wireguard is implemented in &lt;5k lines of code - delegating to trusted crypto libraries instead of reimplementing them. Its simplicity allowed the team to patch the <a href="https://seclists.org/oss-sec/2019/q4/122">route based networking exploit from late 2019</a> before <a href="https://lists.zx2c4.com/pipermail/wireguard/2019-December/004679.html">the CVE was even public</a>.</p>
 <p>And WireGuard is <a href="https://www.wireguard.com/formal-verification/">&ldquo;formally verified&rdquo;</a>, the code equivalent of a mathematical proof, meaning that the design is provably sound.</p>
 <p>Finally, WireGuard runs as a kernel module on most *nixes. It is measurably faster and more efficient than other userland VPN programs (this is especially noticeable compared to OpenVPN on mobile devices like laptops and phones where this affects battery life).</p>
 <p>Bonus: <a href="http://lkml.iu.edu/hypermail/linux/kernel/1808.0/02472.html">Linus loves it</a>.</p>
@@ -170,7 +179,7 @@ Setting up a VPN will let me access devices at any of my sites without having to
 <p>We can install WireGuard according to the instructions in the <a href="https://wireguard.com/install">offical installation documentation</a>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo dnf copr enable jdoss/wireguard
 $ sudo dnf install -y wireguard-dkms wireguard-tools
-</code></pre></div><p>Note: if the running kernel is a different version than the installed <code>kernel-devel</code> package, you will need to reboot. If you don't, you'll see an error like: <code>Unable to access interface: Protocol not supported</code> in the WireGuard logs and the interface will not come up.</p>
+</code></pre></div><p>Note: if the running kernel is a different version than the installed <code>kernel-devel</code> package, you will need to reboot. If you don&rsquo;t, you&rsquo;ll see an error like: <code>Unable to access interface: Protocol not supported</code> in the WireGuard logs and the interface will not come up.</p>
 <h3 id="running-wireguard">Running WireGuard</h3>
 <h4 id="generating-a-keypair">Generating a keypair</h4>
 <p>Before we can start WireGuard, we need to generate a keypair:</p>
@@ -179,7 +188,7 @@ $ umask <span style="color:#ae81ff">077</span>
 $ mkdir -p /etc/wireguard/keys
 $ wg genkey | tee /etc/wireguard/keys/private | wg pubkey &gt; /etc/wireguard/keys/public
 </code></pre></div><h4 id="wg-quick-config-file">wg-quick config file</h4>
-<p>I'm going to run WireGuard with <code>wg-quick</code>, but you can do everything wg-quick does by hand - see <a href="https://wireguard.com/quickstart">the official WireGuard quickstart for details</a>.</p>
+<p>I&rsquo;m going to run WireGuard with <code>wg-quick</code>, but you can do everything wg-quick does by hand - see <a href="https://wireguard.com/quickstart">the official WireGuard quickstart for details</a>.</p>
 <p>My quick config is going in <code>/etc/wireguard/wg0.conf</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Interface]
 # Name = A
@@ -204,9 +213,9 @@ PostUp = wg set %i private-key &lt;(cat /etc/wireguard/keys/private)
 </li>
 </ul>
 <hr>
-<p>At this point I also forwarded <code>51820/udp</code> from my Gateway to this server. How you configure this in your router varies, but mine has a page with a table for port forwards where I added it in. We should also note the Gateway's <strong>Public IP</strong> - mine was 172.217.13.238.</p>
-<p>WireGuard is an &ldquo;undiscoverable&rdquo; service - it does not respond to incoming requests on this port unless they are encrypted with this server's public-key, meaning a peer would have to already know this WireGuard server exists to be able to detect the service. This means that conventional methods for checking if a remote service is listening on a port, like executing a <code>telnet 51820</code>, will not work for WireGuard.</p>
-<p>Since we can't just test that the wg server is listening, we need to add a peer and verify connectivity to be assured that everything is working.</p>
+<p>At this point I also forwarded <code>51820/udp</code> from my Gateway to this server. How you configure this in your router varies, but mine has a page with a table for port forwards where I added it in. We should also note the Gateway&rsquo;s <strong>Public IP</strong> - mine was 135.84.202.203.</p>
+<p>WireGuard is an &ldquo;undiscoverable&rdquo; service - it does not respond to incoming requests on this port unless they are encrypted with this server&rsquo;s public-key, meaning a peer would have to already know this WireGuard server exists to be able to detect the service. This means that conventional methods for checking if a remote service is listening on a port, like executing a <code>telnet 51820</code>, will not work for WireGuard.</p>
+<p>Since we can&rsquo;t just test that the wg server is listening, we need to add a peer and verify connectivity to be assured that everything is working.</p>
 <h4 id="adding-a-peer">Adding a peer</h4>
 <p>On another machine, we repeat the above installation and configuration. This time, our <code>/etc/wireguard/wg0.conf</code> looks like:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Interface]
@@ -233,10 +242,10 @@ AllowedIPs = 172.16.20.10
 # Name = A
 PublicKey = &lt;Peer A&#39;s public key&gt;
 AllowedIPs = 172.16.4.1
-Endpoint = 172.217.13.238:51820
+Endpoint = 135.84.202.203:51820
 </code></pre></div><p>Now, we can bring up WireGuard on both machines with:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl start wg-quick@wg0
-</code></pre></div><p>Like I mentioned before, WireGuard is &ldquo;undiscoverable&rdquo; - it is not a chatty protocol, and only sends data on the VPN when it's asked to. So we need to ask Peer B to send some data to Peer A over wg0 before it will open the VPN tunnel:</p>
+</code></pre></div><p>Like I mentioned before, WireGuard is &ldquo;undiscoverable&rdquo; - it is not a chatty protocol, and only sends data on the VPN when it&rsquo;s asked to. So we need to ask Peer B to send some data to Peer A over wg0 before it will open the VPN tunnel:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ ping 172.16.4.1
 </code></pre></div><p>and check the status of the tunnel on Peer A with:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo wg
@@ -246,15 +255,15 @@ interface: wg0
   listening port: <span style="color:#ae81ff">51820</span>
 
 peer: &lt;redacted&gt;
-  endpoint: 13.107.21.200:41920
+  endpoint: 72.83.31.122:41920
   allowed ips: 172.16.20.1/32
   latest handshake: <span style="color:#ae81ff">1</span> second ago
   transfer: <span style="color:#ae81ff">0</span> KiB received, <span style="color:#ae81ff">0</span> KiB sent
 </code></pre></div><p>Note that Peer B is randomly assigned a port by its NAT gateway since we did not pin it with a port-forward.</p>
 <p>If the tunnel is not connecting, a firewall might be blocking it. See the <a href="#masquerading">masquerading</a> section below for firewalld configs!</p>
 <h2 id="peering">LAN Peering</h2>
-<p>Now that we've established a point-to-point encrypted connection, we can tweak a few settings to allow us to route traffic through WireGuard to do cool things like make the other devices on Peer A's LAN accessible to Peer B, or send Peer B's DNS traffic through a PiHole on Peer A (I will be writing up this as part of my <a href="../pihole-coredns">PiHole and CoreDNS</a> blog post).</p>
-<p>Peer A's LAN is <code>192.168.0.0/16</code>. Let's say there's a device on this LAN that we want to reach - <code>Device A-2</code> - with IP <code>192.168.0.9</code>.</p>
+<p>Now that we&rsquo;ve established a point-to-point encrypted connection, we can tweak a few settings to allow us to route traffic through WireGuard to do cool things like make the other devices on Peer A&rsquo;s LAN accessible to Peer B, or send Peer B&rsquo;s DNS traffic through a PiHole on Peer A (I will be writing up this as part of my <a href="../pihole-coredns">PiHole and CoreDNS</a> blog post).</p>
+<p>Peer A&rsquo;s LAN is <code>192.168.0.0/16</code>. Let&rsquo;s say there&rsquo;s a device on this LAN that we want to reach - <code>Device A-2</code> - with IP <code>192.168.0.9</code>.</p>
 <p>On Peer B, we can make that LAN accessible by adding more <code>AllowedIPs</code> to the wg0.conf:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Interface]
 # Name = B
@@ -268,7 +277,7 @@ AllowedIPs = 172.16.4.1/32, 192.168.0.0/16 # &lt;- we add CIDRs here and wg-quic
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo ip route
 ...
 192.168.0.0/16 dev wg0 scope link 
-</code></pre></div><p>However, we still can't <code>ping 192.168.0.9</code>. <code>Peer A</code> needs to be able to recieve the traffic we're sending over WireGuard and forward it to the appropriate device on it's LAN. For this we need to enable two things: IP forwarding and masquerading.</p>
+</code></pre></div><p>However, we still can&rsquo;t <code>ping 192.168.0.9</code>. <code>Peer A</code> needs to be able to recieve the traffic we&rsquo;re sending over WireGuard and forward it to the appropriate device on it&rsquo;s LAN. For this we need to enable two things: IP forwarding and masquerading.</p>
 <h4 id="ip-forwarding">IP Forwarding</h4>
 <p>We can enable IP forwarding on <code>Peer A</code> temporarily with:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo sysctl -w net.ipv4.ip_forward<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
@@ -276,14 +285,14 @@ AllowedIPs = 172.16.4.1/32, 192.168.0.0/16 # &lt;- we add CIDRs here and wg-quic
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">net.ipv4.ip_forward = 1
 </code></pre></div><h4 id="masquerading">Masquerading</h4>
 <p>Masquerading lets Peer A forward and route traffic that it receives over WireGuard to other IPs, and also allows it to send the replies back to their original sources.</p>
-<p>The <a href="https://wiki.archlinux.org/index.php/WireGuard#Server">ArchWiki points out at this point</a> that it's important for any internet-facing device to have a properly configured firewall. Fedora Server comes with <a href="https://fedoraproject.org/wiki/Firewalld"><code>firewalld</code></a>, but it might not be enabled on your system by default. Start it with:</p>
+<p>The <a href="https://wiki.archlinux.org/index.php/WireGuard#Server">ArchWiki points out at this point</a> that it&rsquo;s important for any internet-facing device to have a properly configured firewall. Fedora Server comes with <a href="https://fedoraproject.org/wiki/Firewalld"><code>firewalld</code></a>, but it might not be enabled on your system by default. Start it with:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo systemctl enable --now firewalld
-</code></pre></div><p>We need to open port <code>51820/udp</code> in firewalld's active zone, and enable masquerading. We can do this temporarily to test if it works by:</p>
+</code></pre></div><p>We need to open port <code>51820/udp</code> in firewalld&rsquo;s active zone, and enable masquerading. We can do this temporarily to test if it works by:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo firewall-cmd --zone<span style="color:#f92672">=</span>FedoraServer --add-port 51820/udp
 $ sudo firewall-cmd --zone<span style="color:#f92672">=</span>FedoraServer --add-masquerade
 </code></pre></div><p>Note: my default zone was &ldquo;FedoraServer&rdquo;, yours might differ. You can check your zones with <code>firewall-cmd --list-all-zones</code>.</p>
 <p>We should now (after restarting wg-quick on both peers), be able to ping <code>Device A-2</code> at <code>192.168.0.9</code> from <code>Peer B</code>!</p>
-<p>Our traffic goes through <code>Peer A</code> over WireGuard, no matter if we're on the same LAN or somewhere else in the world, as long as we can establish a tunnel :)</p>
+<p>Our traffic goes through <code>Peer A</code> over WireGuard, no matter if we&rsquo;re on the same LAN or somewhere else in the world, as long as we can establish a tunnel :)</p>
 <p>Finally, I added this firewalld command to my wg0.conf so that it is added and removed as WireGuard is started and stopped:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Interface]
 # Name = A
@@ -292,8 +301,8 @@ PostUp = firewall-cmd --zone=FedoraServer --add-port 51820/udp &amp;&amp; firewa
 PostDown = firewall-cmd --zone=FedoraServer --remove-port 51820/udp &amp;&amp; firewall-cmd --zone=FedoraServer --remove-masquerade
 </code></pre></div><p>Note: you can have multiple PostUp/PostDown values, they are all executed.</p>
 <p>You could also simply add <code>--permanent</code> to the <code>firewall-cmd</code> snippets to write these changes out permanently.</p>
-<h3 id="whats-next">What's next?</h3>
-<p>With LAN peering configured, I hope you're starting to imaging the possibilities that this network topology allows. Sometime soon I'll be writing about how we can send Peer B's (and C's, and D's, and on, and on) DNS traffic through a PiHole on Peer A (or maybe just on Peer A's LAN??) - watch for that as part of my <a href="../pihole-coredns">PiHole and CoreDNS</a> blog post).</p>
+<h3 id="whats-next">What&rsquo;s next?</h3>
+<p>With LAN peering configured, I hope you&rsquo;re starting to imaging the possibilities that this network topology allows. Sometime soon I&rsquo;ll be writing about how we can send Peer B&rsquo;s (and C&rsquo;s, and D&rsquo;s, and on, and on) DNS traffic through a PiHole on Peer A (or maybe just on Peer A&rsquo;s LAN??) - watch for that as part of my <a href="../pihole-coredns">PiHole and CoreDNS</a> blog post).</p>
 <hr>
 <h4 id="toc">Read the other articles in this series here:</h4>
 <ul>
@@ -338,7 +347,7 @@ PostDown = firewall-cmd --zone=FedoraServer --remove-port 51820/udp &amp;&amp; f
         </div>
       
     
-    
+
 
     
       
@@ -346,7 +355,7 @@ PostDown = firewall-cmd --zone=FedoraServer --remove-port 51820/udp &amp;&amp; f
 
       
     
-    
+
     </div>
 
       </div>
@@ -361,7 +370,7 @@ PostDown = firewall-cmd --zone=FedoraServer --remove-port 51820/udp &amp;&amp; f
 </svg>
 </span>
     <span class="logo__text">blog.rbtr.dev</span>
-    <span class="logo__cursor themed dark-theme"></span>
+    <span class="logo__cursor"></span>
   
 </a>
 

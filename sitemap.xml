@@ -3,6 +3,60 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://blog.rbtr.dev/tags/ip/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/ipv4/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/ipv6/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/mailx/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/postfix/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/postfix-ipv6/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/posts/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/tags/</loc>
+    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
     <loc>https://blog.rbtr.dev/posts/dnf-automatic/</loc>
     <lastmod>2020-01-17T08:32:32-05:00</lastmod>
     <changefreq>daily</changefreq>
@@ -27,37 +81,7 @@
   </url>
   
   <url>
-    <loc>https://blog.rbtr.dev/tags/postfix/</loc>
-    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <url>
-    <loc>https://blog.rbtr.dev/posts/</loc>
-    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <url>
-    <loc>https://blog.rbtr.dev/</loc>
-    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <url>
-    <loc>https://blog.rbtr.dev/tags/</loc>
-    <lastmod>2020-01-17T08:32:32-05:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <url>
     <loc>https://blog.rbtr.dev/posts/adding-ip-addresses/</loc>
-    <lastmod>2020-01-14T17:24:44-05:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <url>
-    <loc>https://blog.rbtr.dev/tags/ip/</loc>
     <lastmod>2020-01-14T17:24:44-05:00</lastmod>
     <changefreq>daily</changefreq>
   </url>
@@ -124,12 +148,6 @@
   
   <url>
     <loc>https://blog.rbtr.dev/tags/gmail/</loc>
-    <lastmod>2020-01-09T08:36:21-05:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <url>
-    <loc>https://blog.rbtr.dev/tags/mailx/</loc>
     <lastmod>2020-01-09T08:36:21-05:00</lastmod>
     <changefreq>daily</changefreq>
   </url>
