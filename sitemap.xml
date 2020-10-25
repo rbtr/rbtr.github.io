@@ -3,6 +3,24 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://blog.rbtr.dev/fiction/</loc>
+    <lastmod>2020-10-25T16:40:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/fiction/marble/</loc>
+    <lastmod>2020-10-25T16:40:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
+    <loc>https://blog.rbtr.dev/</loc>
+    <lastmod>2020-10-25T16:40:16-05:00</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  
+  <url>
     <loc>https://blog.rbtr.dev/tags/ip/</loc>
     <lastmod>2020-07-21T11:26:16-05:00</lastmod>
     <changefreq>daily</changefreq>
@@ -40,12 +58,6 @@
   
   <url>
     <loc>https://blog.rbtr.dev/posts/</loc>
-    <lastmod>2020-07-21T11:26:16-05:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  
-  <url>
-    <loc>https://blog.rbtr.dev/</loc>
     <lastmod>2020-07-21T11:26:16-05:00</lastmod>
     <changefreq>daily</changefreq>
   </url>

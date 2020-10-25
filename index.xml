@@ -9,10 +9,31 @@
     <description>Recent content on rbtr.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 21 Jul 2020 11:26:16 -0500</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2020 16:40:16 -0500</lastBuildDate>
     
 	<atom:link href="https://blog.rbtr.dev/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Marble</title>
+      <link>https://blog.rbtr.dev/fiction/marble/</link>
+      <pubDate>Sun, 25 Oct 2020 16:40:16 -0500</pubDate>
+      
+      <guid>https://blog.rbtr.dev/fiction/marble/</guid>
+      <description>
+        
+          
+          
+          
+        
+        
+        
+          She stopped short, and blinked the rain out of her eyes. She had been completely lost in thought.
+It was a cold, dreary day. Overcast, drizzly, and gray, perfectly suited to the theme of the city. The sidewalk was nevertheless packed with people - heads down under umbrellas, or hunched, hoods pulled over their faces to keep the cold water out. The thickness of the air and the sound of the rain was muting the noise of the traffic, at least, and keeping the smog down.
+          
+        
+        </description>
+    </item>
     
     <item>
       <title>Postfix IPv6</title>
@@ -189,26 +210,6 @@
         
         
           Salvaging a failed upgrade with chroot
-          
-        
-        </description>
-    </item>
-    
-    <item>
-      <title>New Year, New Lab</title>
-      <link>https://blog.rbtr.dev/posts/new-year-new-lab/</link>
-      <pubDate>Mon, 06 Jan 2020 11:09:22 -0500</pubDate>
-      
-      <guid>https://blog.rbtr.dev/posts/new-year-new-lab/</guid>
-      <description>
-        
-          
-          
-          
-        
-        
-        
-          Leveling up the homelab
           
         
         </description>
