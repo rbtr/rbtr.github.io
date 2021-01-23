@@ -180,23 +180,23 @@ Sections:  Containerized PiHole Using the PiHole for DNS  On the LAN Over WireGu
 </ol>
 <p>The first thing we need to is translate their official docker-compose example in to a podman compatible script. For reference, here that is:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#75715e"># pihole-docker-compose.yaml</span>
-<span style="color:#66d9ef">version</span>: <span style="color:#e6db74">&#34;3&#34;</span>
-<span style="color:#66d9ef">services</span>:
-  <span style="color:#66d9ef">pihole</span>:
-    <span style="color:#66d9ef">container_name</span>: pihole
-    <span style="color:#66d9ef">image</span>: pihole/pihole:latest
-    <span style="color:#66d9ef">ports</span>:
+<span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;3&#34;</span>
+<span style="color:#f92672">services</span>:
+  <span style="color:#f92672">pihole</span>:
+    <span style="color:#f92672">container_name</span>: <span style="color:#ae81ff">pihole</span>
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">pihole/pihole:latest</span>
+    <span style="color:#f92672">ports</span>:
       - <span style="color:#e6db74">&#34;53:53/tcp&#34;</span>
       - <span style="color:#e6db74">&#34;53:53/udp&#34;</span>
       - <span style="color:#e6db74">&#34;67:67/udp&#34;</span>
       - <span style="color:#e6db74">&#34;80:80/tcp&#34;</span>
       - <span style="color:#e6db74">&#34;443:443/tcp&#34;</span>
-    <span style="color:#66d9ef">environment</span>:
-      <span style="color:#66d9ef">TZ</span>: <span style="color:#e6db74">&#39;America/Chicago&#39;</span>
-    <span style="color:#66d9ef">volumes</span>:
+    <span style="color:#f92672">environment</span>:
+      <span style="color:#f92672">TZ</span>: <span style="color:#e6db74">&#39;America/Chicago&#39;</span>
+    <span style="color:#f92672">volumes</span>:
       - <span style="color:#e6db74">&#39;./etc-pihole/:/etc/pihole/&#39;</span>
       - <span style="color:#e6db74">&#39;./etc-dnsmasq.d/:/etc/dnsmasq.d/&#39;</span>
-    <span style="color:#66d9ef">restart</span>: unless-stopped
+    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
 </code></pre></div><p>Which I turned in to the following <code>pihole-create.sh</code> script which creates the container using podman:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/bash
 </span><span style="color:#75715e"></span>podman create <span style="color:#ae81ff">\
@@ -350,7 +350,7 @@ AllowedIPs = 172.16.4.1, 192.168.0.0/24 # &lt;- this is my LAN CIDR
   
 </a>
 
-      <span>© 2020 Evan Baker </span>
+      <span>© 2021 Evan Baker </span>
       <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
     </div>
   </div>

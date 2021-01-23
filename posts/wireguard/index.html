@@ -224,7 +224,7 @@ Address = 172.16.20.10
 ListenPort = 51820
 PostUp = wg set %i private-key &lt;(cat /etc/wireguard/keys/private)
 </code></pre></div><p>Because this peer will not be permanently listening for wg traffic on this network, I did <strong>not</strong> port forward from the router to this peer. Since Peer A is port-forwarded, Peer B will be reachable thanks to <a href="https://en.wikipedia.org/wiki/Hole_punching_(networking)">NAT hole-punching</a> - the router will assign a random public port and forward it to Peer B, and Peer A will send traffic to that port.</p>
-<p>Back on <code>Peer A</code> I need to add <code>Peer B</code>'s public key (from <code>/etc/wireguard/keys/public</code>), and <code>AllowedIP</code> (its <code>Address</code>):</p>
+<p>Back on <code>Peer A</code> I need to add <code>Peer B</code>&rsquo;s public key (from <code>/etc/wireguard/keys/public</code>), and <code>AllowedIP</code> (its <code>Address</code>):</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Interface]
 # Name = A
 ...
@@ -233,7 +233,7 @@ PostUp = wg set %i private-key &lt;(cat /etc/wireguard/keys/private)
 # Name = B
 PublicKey = &lt;Peer B&#39;s public key&gt;
 AllowedIPs = 172.16.20.10
-</code></pre></div><p>Likewise, on <code>Peer B</code>, I add <code>Peer A</code>'s data. Notice I also add <code>Peer A</code>'s <code>Endpoint</code> address since it is the one with the fixed public port-forward.</p>
+</code></pre></div><p>Likewise, on <code>Peer B</code>, I add <code>Peer A</code>&rsquo;s data. Notice I also add <code>Peer A</code>&rsquo;s <code>Endpoint</code> address since it is the one with the fixed public port-forward.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">[Interface]
 # Name = B
 ...
@@ -374,7 +374,7 @@ PostDown = firewall-cmd --zone=FedoraServer --remove-port 51820/udp &amp;&amp; f
   
 </a>
 
-      <span>© 2020 Evan Baker </span>
+      <span>© 2021 Evan Baker </span>
       <span>Theme created by <a href="https://twitter.com/panr" target="_blank" rel="noopener">panr</a></span>
     </div>
   </div>
